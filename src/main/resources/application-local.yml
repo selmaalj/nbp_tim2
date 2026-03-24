@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:oracle:thin:@ora-02.db.lab.etf.unsa.ba:1521:ETFDB
-    username: NBPT2
-    password: nbpt2
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     open-in-view: false
@@ -11,8 +11,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.OracleDialect
-        default_schema: NBPT2
+        default_schema: ${DB_SCHEMA:NBPT2}
     show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    default-schema: ${DB_SCHEMA:NBPT2}
+    schemas: ${DB_SCHEMA:NBPT2}
 
 app:
   database:
