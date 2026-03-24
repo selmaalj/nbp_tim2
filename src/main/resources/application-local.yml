@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@ora-02.db.lab.etf.unsa.ba:1521:ETFDB
+    username: NBPT2
+    password: nbpt2
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+        default_schema: NBPT2
+    show-sql: true
+
+app:
+  database:
+    shared-schema: NBP
