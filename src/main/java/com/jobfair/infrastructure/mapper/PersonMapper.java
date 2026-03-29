@@ -1,15 +1,17 @@
 package com.jobfair.infrastructure.mapper;
 
-import com.jobfair.api.dto.request.PersonRequest;
-import com.jobfair.api.dto.response.PersonResponse;
-import com.jobfair.domain.model.Person;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+import com.jobfair.api.dto.request.PersonRequest;
+import com.jobfair.api.dto.response.PersonResponse;
+import com.jobfair.domain.model.Person;
+
+@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PersonMapper extends BaseMapper<Person, PersonRequest, PersonResponse> {
 
     @Override

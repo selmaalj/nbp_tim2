@@ -1,15 +1,17 @@
 package com.jobfair.infrastructure.mapper;
 
-import com.jobfair.api.dto.request.MediaOutletRequest;
-import com.jobfair.api.dto.response.MediaOutletResponse;
-import com.jobfair.domain.model.MediaOutlet;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+import com.jobfair.api.dto.request.MediaOutletRequest;
+import com.jobfair.api.dto.response.MediaOutletResponse;
+import com.jobfair.domain.model.MediaOutlet;
+
+@Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MediaOutletMapper extends BaseMapper<MediaOutlet, MediaOutletRequest, MediaOutletResponse> {
 
     @Override
