@@ -2,7 +2,6 @@ package com.jobfair.shared.constants;
 
 public final class ApiPaths {
 
-    public static final String EXAMPLES = "/examples";
     public static final String MEDIA = "/media";
     public static final String PEOPLE = "/people";
     public static final String ORGANIZATIONS = "/organizations";

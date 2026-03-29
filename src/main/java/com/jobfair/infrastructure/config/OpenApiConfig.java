@@ -16,9 +16,9 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("JobFAIR API")
-                        .description("Clean Spring Boot CRUD template focused on the Example entity and reusable generic service/controller architecture")
+                .description("Production-grade JobFAIR backend with reusable generic service/controller architecture")
                         .version("v1")
-                        .contact(new Contact().name("JobFAIR Team").email("jobfair@example.com"))
+                .contact(new Contact().name("JobFAIR Team").email("support@jobfair.ba"))
                         .license(new License().name("Internal Use")));
     }
 }
