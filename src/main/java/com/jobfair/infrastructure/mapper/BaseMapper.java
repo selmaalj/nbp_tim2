@@ -1,9 +1,11 @@
 package com.jobfair.infrastructure.mapper;
 
+import org.mapstruct.MappingTarget;
+
 /**
  * Generic mapper abstraction used by abstract service layer.
  *
- * @param <T> entity type
+ * @param <T>          entity type
  * @param <RequestDTO> request DTO
  * @param <ResponseDTO> response DTO
  */
@@ -13,7 +15,7 @@ public interface BaseMapper<T, RequestDTO, ResponseDTO> {
 
     ResponseDTO toResponse(T entity);
 
-    void updateEntity(T entity, RequestDTO request);
+    void updateEntity(@MappingTarget T entity, RequestDTO request);
 
-    void patchEntity(T entity, RequestDTO request);
+    void patchEntity(@MappingTarget T entity, RequestDTO request);
 }
