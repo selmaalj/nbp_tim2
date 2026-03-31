@@ -89,6 +89,39 @@ erDiagram
     string outlet_id FK
   }
 
+  NBP_ROLE {
+    int id PK
+    string name
+  }
+
+  NBP_APPS {
+    int id PK
+    string app_id
+    int manager_id
+    date expiry_date
+  }
+
+  NBP_LOG {
+    int id PK
+    string action_name
+    string table_name
+    datetime date_time
+    string db_user
+  }
+
+  NBP_USER {
+    int id PK
+    string first_name
+    string last_name
+    string email
+    string password
+    string username
+    string phone_number
+    date birth_date
+    int address_id
+    int role_id
+  }
+
   STAT_BOARDS ||--o{ STATS : "board_id"
 
   MEDIA ||--o{ PEOPLE : "image_id (set null)"
