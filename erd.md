@@ -89,11 +89,6 @@ erDiagram
     string outlet_id FK
   }
 
-  NBP_ROLE {
-    int id PK
-    string name
-  }
-
   NBP_APPS {
     int id PK
     string app_id
@@ -109,6 +104,11 @@ erDiagram
     string db_user
   }
 
+    NBP_ROLE {
+    int id PK
+    string name
+  }
+
   NBP_USER {
     int id PK
     string first_name
@@ -119,7 +119,7 @@ erDiagram
     string phone_number
     date birth_date
     int address_id
-    int role_id
+    int role_id FK
   }
 
   STAT_BOARDS ||--o{ STATS : "board_id"
@@ -143,6 +143,8 @@ erDiagram
 
   MEDIA ||--o{ MEDIA_OUTLETS : "logo_id (set null)"
   MEDIA_OUTLETS ||--o{ MEDIA_PARTICIPATIONS : "outlet_id"
+
+  NBP_ROLE ||--o{ NBP_USER : "role_id"
 ```
 
 ## View it
