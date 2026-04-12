@@ -17,6 +17,7 @@ import com.jobfair.domain.service.MediaOutletService;
 import com.jobfair.shared.constants.ApiPaths;
 import com.jobfair.shared.response.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
@@ -34,24 +35,28 @@ public class MediaOutletController extends AbstractCrudController<String, MediaO
     }
 
     @GetMapping("/slug/{slug}")
+    @Operation(summary = "Get media outlet by slug")
     public ResponseEntity<ApiResponse<MediaOutletResponse>> slug(@PathVariable @NotBlank String slug) {
         MediaOutletResponse payload = mediaOutletService.getBySlug(slug);
         return ResponseEntity.ok(ApiResponse.success("Media outlet by slug", payload));
     }
 
     @GetMapping("/kind/{kind}")
+    @Operation(summary = "Get media outlets by kind")
     public ResponseEntity<ApiResponse<List<MediaOutletResponse>>> kind(@PathVariable MediaKind kind) {
         List<MediaOutletResponse> payload = mediaOutletService.getByKind(kind);
         return ResponseEntity.ok(ApiResponse.success("Media outlets by kind", payload));
     }
 
     @GetMapping(params = "q")
+    @Operation(summary = "Search media outlets")
     public ResponseEntity<ApiResponse<List<MediaOutletResponse>>> search(@RequestParam("q") @NotBlank String q) {
         List<MediaOutletResponse> payload = mediaOutletService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Media outlet search", payload));
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filter media outlets")
     public ResponseEntity<ApiResponse<List<MediaOutletResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) MediaKind kind,

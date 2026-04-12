@@ -1,20 +1,24 @@
 package com.jobfair.api.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobfair.api.dto.request.GalleryImageRequest;
 import com.jobfair.api.dto.response.GalleryImageResponse;
 import com.jobfair.domain.service.GalleryImageService;
 import com.jobfair.shared.constants.ApiPaths;
 import com.jobfair.shared.response.ApiResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(ApiPaths.GALLERY_IMAGES)
@@ -30,18 +34,21 @@ public class GalleryImageController extends AbstractCrudController<String, Galle
     }
 
     @GetMapping("/organization/{organizationId}")
+    @Operation(summary = "Get gallery images by organization ID")
     public ResponseEntity<ApiResponse<List<GalleryImageResponse>>> organization(@PathVariable @NotBlank String organizationId) {
         List<GalleryImageResponse> payload = galleryImageService.getByOrganizationId(organizationId);
         return ResponseEntity.ok(ApiResponse.success("Gallery images by organization", payload));
     }
 
     @GetMapping("/media/{mediaId}")
+    @Operation(summary = "Get gallery images by media ID")
     public ResponseEntity<ApiResponse<List<GalleryImageResponse>>> media(@PathVariable @NotBlank String mediaId) {
         List<GalleryImageResponse> payload = galleryImageService.getByMediaId(mediaId);
         return ResponseEntity.ok(ApiResponse.success("Gallery images by media", payload));
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filter gallery images")
     public ResponseEntity<ApiResponse<List<GalleryImageResponse>>> filter(
             @RequestParam(required = false) String organizationId,
             @RequestParam(required = false) String mediaId,

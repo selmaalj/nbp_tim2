@@ -18,6 +18,7 @@ import com.jobfair.domain.service.JobService;
 import com.jobfair.shared.constants.ApiPaths;
 import com.jobfair.shared.response.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
@@ -35,24 +36,28 @@ public class JobController extends AbstractCrudController<String, JobRequest, Jo
     }
 
     @GetMapping("/slug/{slug}")
+    @Operation(summary = "Get job by slug")
     public ResponseEntity<ApiResponse<JobResponse>> slug(@PathVariable @NotBlank String slug) {
         JobResponse payload = jobService.getBySlug(slug);
         return ResponseEntity.ok(ApiResponse.success("Job by slug", payload));
     }
 
     @GetMapping("/active")
+    @Operation(summary = "Get active jobs")
     public ResponseEntity<ApiResponse<List<JobResponse>>> active() {
         List<JobResponse> payload = jobService.getActive();
         return ResponseEntity.ok(ApiResponse.success("Active jobs", payload));
     }
 
     @GetMapping(params = "q")
+    @Operation(summary = "Search jobs")
     public ResponseEntity<ApiResponse<List<JobResponse>>> search(@RequestParam("q") @NotBlank String q) {
         List<JobResponse> payload = jobService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Job search", payload));
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filter jobs")
     public ResponseEntity<ApiResponse<List<JobResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime postedAfter,

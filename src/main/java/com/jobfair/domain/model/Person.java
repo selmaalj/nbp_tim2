@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -55,6 +56,16 @@ public class Person extends BaseEntity {
 
     @Column(length = 120)
     private String position;
+
+    @Lob
+    @Column(name = "cv_data")
+    private byte[] cvData;
+
+    @Column(name = "cv_file_name", length = 255)
+    private String cvFileName;
+
+    @Column(name = "cv_mime_type", length = 150)
+    private String cvMimeType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_person_media"))

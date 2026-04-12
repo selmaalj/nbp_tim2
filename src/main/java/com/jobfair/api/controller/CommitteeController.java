@@ -1,19 +1,23 @@
 package com.jobfair.api.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobfair.api.dto.request.CommitteeRequest;
 import com.jobfair.api.dto.response.CommitteeResponse;
 import com.jobfair.domain.service.CommitteeService;
 import com.jobfair.shared.constants.ApiPaths;
 import com.jobfair.shared.response.ApiResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(ApiPaths.COMMITTEES)
@@ -29,24 +33,28 @@ public class CommitteeController extends AbstractCrudController<String, Committe
     }
 
     @GetMapping("/year/{year}")
+    @Operation(summary = "Get committee by year")
     public ResponseEntity<ApiResponse<CommitteeResponse>> year(@PathVariable Integer year) {
         CommitteeResponse payload = committeeService.getByYear(year);
         return ResponseEntity.ok(ApiResponse.success("Committee by year", payload));
     }
 
     @GetMapping("/latest")
+    @Operation(summary = "Get latest committee")
     public ResponseEntity<ApiResponse<CommitteeResponse>> latest() {
         CommitteeResponse payload = committeeService.getLatest();
         return ResponseEntity.ok(ApiResponse.success("Latest committee", payload));
     }
 
     @GetMapping(params = "q")
+    @Operation(summary = "Search committees")
     public ResponseEntity<ApiResponse<List<CommitteeResponse>>> search(@RequestParam("q") String q) {
         List<CommitteeResponse> payload = committeeService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Committee search", payload));
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filter committees")
     public ResponseEntity<ApiResponse<List<CommitteeResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Integer fromYear,

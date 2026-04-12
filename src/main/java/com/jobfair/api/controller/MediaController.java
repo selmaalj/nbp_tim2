@@ -1,19 +1,23 @@
 package com.jobfair.api.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobfair.api.dto.request.MediaRequest;
 import com.jobfair.api.dto.response.MediaResponse;
 import com.jobfair.domain.service.MediaService;
 import com.jobfair.shared.constants.ApiPaths;
 import com.jobfair.shared.response.ApiResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(ApiPaths.MEDIA)
@@ -29,24 +33,28 @@ public class MediaController extends AbstractCrudController<String, MediaRequest
     }
 
     @GetMapping("/url")
+    @Operation(summary = "Get media by URL")
     public ResponseEntity<ApiResponse<MediaResponse>> url(@RequestParam @NotBlank String value) {
         MediaResponse payload = mediaService.getByUrl(value.trim());
         return ResponseEntity.ok(ApiResponse.success("Media by url", payload));
     }
 
     @GetMapping("/mime")
+    @Operation(summary = "Get media by MIME type")
     public ResponseEntity<ApiResponse<List<MediaResponse>>> mime(@RequestParam @NotBlank String value) {
         List<MediaResponse> payload = mediaService.getByMimeType(value.trim());
         return ResponseEntity.ok(ApiResponse.success("Media by mime", payload));
     }
 
     @GetMapping(params = "q")
+    @Operation(summary = "Search media")
     public ResponseEntity<ApiResponse<List<MediaResponse>>> search(@RequestParam("q") @NotBlank String q) {
         List<MediaResponse> payload = mediaService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Media search", payload));
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filter media")
     public ResponseEntity<ApiResponse<List<MediaResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String mimeType,

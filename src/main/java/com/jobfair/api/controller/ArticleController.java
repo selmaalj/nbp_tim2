@@ -18,6 +18,7 @@ import com.jobfair.domain.service.ArticleService;
 import com.jobfair.shared.constants.ApiPaths;
 import com.jobfair.shared.response.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
@@ -35,24 +36,28 @@ public class ArticleController extends AbstractCrudController<String, ArticleReq
     }
 
     @GetMapping("/slug/{slug}")
+    @Operation(summary = "Get article by slug")
     public ResponseEntity<ApiResponse<ArticleResponse>> slug(@PathVariable @NotBlank String slug) {
         ArticleResponse payload = articleService.getBySlug(slug);
         return ResponseEntity.ok(ApiResponse.success("Article by slug", payload));
     }
 
     @GetMapping("/published")
+    @Operation(summary = "Get published articles")
     public ResponseEntity<ApiResponse<List<ArticleResponse>>> published() {
         List<ArticleResponse> payload = articleService.getPublished();
         return ResponseEntity.ok(ApiResponse.success("Published articles", payload));
     }
 
     @GetMapping(params = "q")
+    @Operation(summary = "Search articles")
     public ResponseEntity<ApiResponse<List<ArticleResponse>>> search(@RequestParam("q") @NotBlank String q) {
         List<ArticleResponse> payload = articleService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Article search", payload));
     }
 
     @GetMapping("/filter")
+    @Operation(summary = "Filter articles")
     public ResponseEntity<ApiResponse<List<ArticleResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Boolean published,
