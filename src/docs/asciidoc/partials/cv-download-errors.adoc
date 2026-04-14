@@ -1,0 +1,5 @@
+[discrete]
+===== Possible `404 Not Found`
+CV missing or person not found:
+
+include::{snippets}/people-get-cv-not-found/http-response.adoc[]

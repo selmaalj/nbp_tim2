@@ -1,0 +1,11 @@
+[discrete]
+===== Possible `400 Bad Request`
+Invalid request body validation:
+
+include::{snippets}/errors-invalid-body/http-response.adoc[]
+
+[discrete]
+===== Possible `400 Bad Request`
+Malformed JSON payload:
+
+include::{snippets}/errors-malformed-json/http-response.adoc[]

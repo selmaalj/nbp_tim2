@@ -1,0 +1,16 @@
+== Appendices
+
+=== Generated OpenAPI Artifacts
+
+JSON:
+`{openapiDir}/jobfair-openapi.json`
+
+YAML:
+`{openapiDir}/jobfair-openapi.yaml`
+
+PDF output:
+`target/generated-docs/jobfair-api.pdf`
+
+=== Schema Notes
+
+Schema details are sourced from the live OpenAPI contract and the DTO model annotations in the application code. The JSON envelope and validation payload are registered as reusable OpenAPI components.

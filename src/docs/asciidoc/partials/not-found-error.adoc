@@ -1,0 +1,5 @@
+[discrete]
+===== Possible `404 Not Found`
+Representative not-found payload:
+
+include::{snippets}/errors-resource-not-found/http-response.adoc[]

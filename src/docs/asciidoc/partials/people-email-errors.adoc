@@ -1,0 +1,11 @@
+[discrete]
+===== Possible `400 Bad Request`
+Invalid email parameter:
+
+include::{snippets}/errors-invalid-parameter/http-response.adoc[]
+
+[discrete]
+===== Possible `404 Not Found`
+Representative not-found payload:
+
+include::{snippets}/errors-resource-not-found/http-response.adoc[]
