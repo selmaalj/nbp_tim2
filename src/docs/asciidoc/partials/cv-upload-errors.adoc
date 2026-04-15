@@ -1,0 +1,17 @@
+[discrete]
+===== Possible `400 Bad Request`
+Missing multipart file:
+
+include::{snippets}/people-upload-cv-missing-file/http-response.adoc[]
+
+[discrete]
+===== Possible `400 Bad Request`
+Invalid CV file:
+
+include::{snippets}/people-upload-cv-invalid-file/http-response.adoc[]
+
+[discrete]
+===== Possible `404 Not Found`
+Representative not-found payload:
+
+include::{snippets}/errors-resource-not-found/http-response.adoc[]

@@ -1,0 +1,5 @@
+[discrete]
+===== Possible `400 Bad Request`
+Representative type-conversion or enum/date parsing failure:
+
+include::{snippets}/errors-type-mismatch/http-response.adoc[]

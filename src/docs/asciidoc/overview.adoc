@@ -1,0 +1,47 @@
+== Overview
+
+This handbook is generated from verified MockMvc documentation snippets and the live OpenAPI contract exposed by the application.
+
+Base URL:
+`http://localhost:8080`
+
+Response envelope:
+JSON endpoints return `success`, `message`, `data`, and `timestamp`.
+
+Timestamp format:
+ISO-8601 local date-time, for example `2026-04-14T21:30:00`.
+
+Content types:
+Most routes use `application/json`. `POST /people/{id}/cv` consumes `multipart/form-data`. `GET /people/{id}/cv` returns a binary download with `application/octet-stream`.
+
+Error model:
+Request body validation, method-parameter validation, missing parameters, multipart part failures, malformed JSON, resource-not-found cases, and conversion failures all return the standard JSON envelope.
+
+Representative failure cases:
+
+=== Invalid Request Body
+include::{snippets}/errors-invalid-body/http-response.adoc[]
+
+=== Missing Request Parameter
+include::{snippets}/errors-missing-parameter/http-response.adoc[]
+
+=== Invalid Request Parameter
+include::{snippets}/errors-invalid-parameter/http-response.adoc[]
+
+=== Type Conversion Failure
+include::{snippets}/errors-type-mismatch/http-response.adoc[]
+
+=== Malformed JSON
+include::{snippets}/errors-malformed-json/http-response.adoc[]
+
+=== Resource Not Found
+include::{snippets}/errors-resource-not-found/http-response.adoc[]
+
+=== Missing CV File
+include::{snippets}/people-upload-cv-missing-file/http-response.adoc[]
+
+=== Invalid CV File
+include::{snippets}/people-upload-cv-invalid-file/http-response.adoc[]
+
+=== Missing CV Download
+include::{snippets}/people-get-cv-not-found/http-response.adoc[]
