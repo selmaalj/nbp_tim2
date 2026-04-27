@@ -15,46 +15,43 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.stream.Stream;
-
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @AutoConfigureRestDocs(outputDir = "target/generated-snippets")
 class ApiDocumentationTest extends AbstractApiDocumentationTestSupport {
 
-    static Stream<SuccessDocSpec> documentedEndpoints() {
-        return ApiDocumentationCatalog.successSpecs().stream();
-    }
+    @Autowired
+    private RequestMappingHandlerMapping handlerMapping;
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("documentedEndpoints")
-    void documentSuccessEndpoints(SuccessDocSpec spec) throws Exception {
-        spec.stubber().accept(this);
+    @Test
+    void documentSuccessEndpoints() throws Exception {
+        for (SuccessDocSpec spec : ApiDocumentationSpecs.successSpecs(handlerMapping)) {
+            ResultActions result = mockMvc.perform(buildRequest(spec));
+            result.andExpect(status().is(spec.expectedStatus().value()));
 
-        ResultActions result = mockMvc.perform(buildRequest(spec));
-        result.andExpect(status().is(spec.expectedStatus().value()));
+            if (spec.binaryResponse()) {
+                result.andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                        .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("attachment;")))
+                        .andDo(document(spec.snippetId()));
+                continue;
+            }
 
-        if (spec.binaryResponse()) {
-            result.andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-                    .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("attachment;")))
-                    .andDo(document(spec.snippetId()));
-            return;
+            result.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.message").isNotEmpty())
+                    .andDo(document(
+                            spec.snippetId(),
+                            preprocessRequest(prettyPrint()),
+                            preprocessResponse(prettyPrint())
+                    ));
         }
-
-        result.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").isNotEmpty())
-                .andDo(document(
-                        spec.snippetId(),
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
-                ));
     }
 
     private MockHttpServletRequestBuilder buildRequest(SuccessDocSpec spec) throws Exception {

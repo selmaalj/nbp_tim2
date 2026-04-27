@@ -15,15 +15,19 @@ import com.jobfair.api.dto.response.OrganizationResponse;
 import com.jobfair.domain.model.enums.OrganizationType;
 import com.jobfair.domain.service.OrganizationService;
 import com.jobfair.shared.constants.ApiPaths;
+import com.jobfair.shared.docs.ApiResourceDocumentation;
+import com.jobfair.shared.docs.DocParameter;
+import com.jobfair.shared.docs.EndpointDocumentation;
+import com.jobfair.shared.docs.ErrorDocProfile;
 import com.jobfair.shared.response.ApiResponse;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping(ApiPaths.ORGANIZATIONS)
-@Tag(name = "Organizations")
+@ApiResourceDocumentation(order = 100, singularName = "organization", pluralName = "organizations", sectionTitle = "Organizations", snippetPrefix = "organizations", sampleId = "organization-1", description = "Organization catalog, types, and search.")
+@Tag(name = "Organizations", description = "Organization catalog, types, and search.")
 @Validated
 public class OrganizationController extends AbstractCrudController<String, OrganizationRequest, OrganizationResponse> {
 
@@ -35,28 +39,32 @@ public class OrganizationController extends AbstractCrudController<String, Organ
     }
 
     @GetMapping("/slug/{slug}")
-    @Operation(summary = "Get organization by slug")
+    @EndpointDocumentation(order = 70, snippetId = "organizations-slug", displayName = "GET /organizations/slug/{slug}", summary = "Get organization by slug", pathParameters = @DocParameter(name = "slug", value = "tech-corp"), errorProfiles = ErrorDocProfile.NOT_FOUND)
     public ResponseEntity<ApiResponse<OrganizationResponse>> slug(@PathVariable @NotBlank String slug) {
         OrganizationResponse payload = organizationService.getBySlug(slug);
         return ResponseEntity.ok(ApiResponse.success("Organization by slug", payload));
     }
 
     @GetMapping("/type/{type}")
-    @Operation(summary = "Get organizations by type")
+    @EndpointDocumentation(order = 80, snippetId = "organizations-type", displayName = "GET /organizations/type/{type}", summary = "Get organizations by type", pathParameters = @DocParameter(name = "type", value = "COMPANY"), errorProfiles = ErrorDocProfile.TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<List<OrganizationResponse>>> type(@PathVariable OrganizationType type) {
         List<OrganizationResponse> payload = organizationService.getByType(type);
         return ResponseEntity.ok(ApiResponse.success("Organizations by type", payload));
     }
 
     @GetMapping(params = "q")
-    @Operation(summary = "Search organizations")
+    @EndpointDocumentation(order = 90, snippetId = "organizations-search", displayName = "GET /organizations?q=...", summary = "Search organizations", queryParameters = @DocParameter(name = "q", value = "tech"))
     public ResponseEntity<ApiResponse<List<OrganizationResponse>>> search(@RequestParam("q") @NotBlank String q) {
         List<OrganizationResponse> payload = organizationService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Organization search", payload));
     }
 
     @GetMapping("/filter")
-    @Operation(summary = "Filter organizations")
+    @EndpointDocumentation(order = 100, snippetId = "organizations-filter", displayName = "GET /organizations/filter", summary = "Filter organizations", queryParameters = {
+            @DocParameter(name = "q", value = "tech"),
+            @DocParameter(name = "type", value = "COMPANY"),
+            @DocParameter(name = "hasWebsite", value = "true")
+    }, errorProfiles = ErrorDocProfile.TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<List<OrganizationResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) OrganizationType type,

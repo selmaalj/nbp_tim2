@@ -14,15 +14,19 @@ import com.jobfair.api.dto.request.GalleryImageRequest;
 import com.jobfair.api.dto.response.GalleryImageResponse;
 import com.jobfair.domain.service.GalleryImageService;
 import com.jobfair.shared.constants.ApiPaths;
+import com.jobfair.shared.docs.ApiResourceDocumentation;
+import com.jobfair.shared.docs.DocParameter;
+import com.jobfair.shared.docs.EndpointDocumentation;
+import com.jobfair.shared.docs.ErrorDocProfile;
 import com.jobfair.shared.response.ApiResponse;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping(ApiPaths.GALLERY_IMAGES)
-@Tag(name = "Gallery images")
+@ApiResourceDocumentation(order = 50, singularName = "gallery image", pluralName = "gallery images", sectionTitle = "Gallery Images", snippetPrefix = "gallery-images", sampleId = "gallery-image-1", description = "Organization gallery image relations.")
+@Tag(name = "Gallery Images", description = "Organization gallery image relations.")
 @Validated
 public class GalleryImageController extends AbstractCrudController<String, GalleryImageRequest, GalleryImageResponse> {
 
@@ -34,21 +38,27 @@ public class GalleryImageController extends AbstractCrudController<String, Galle
     }
 
     @GetMapping("/organization/{organizationId}")
-    @Operation(summary = "Get gallery images by organization ID")
+    @EndpointDocumentation(order = 70, snippetId = "gallery-images-by-organization", displayName = "GET /gallery-images/organization/{organizationId}", summary = "Get gallery images by organization ID", pathParameters = @DocParameter(name = "organizationId", value = "organization-1"))
     public ResponseEntity<ApiResponse<List<GalleryImageResponse>>> organization(@PathVariable @NotBlank String organizationId) {
         List<GalleryImageResponse> payload = galleryImageService.getByOrganizationId(organizationId);
         return ResponseEntity.ok(ApiResponse.success("Gallery images by organization", payload));
     }
 
     @GetMapping("/media/{mediaId}")
-    @Operation(summary = "Get gallery images by media ID")
+    @EndpointDocumentation(order = 80, snippetId = "gallery-images-by-media", displayName = "GET /gallery-images/media/{mediaId}", summary = "Get gallery images by media ID", pathParameters = @DocParameter(name = "mediaId", value = "media-1"))
     public ResponseEntity<ApiResponse<List<GalleryImageResponse>>> media(@PathVariable @NotBlank String mediaId) {
         List<GalleryImageResponse> payload = galleryImageService.getByMediaId(mediaId);
         return ResponseEntity.ok(ApiResponse.success("Gallery images by media", payload));
     }
 
     @GetMapping("/filter")
-    @Operation(summary = "Filter gallery images")
+    @EndpointDocumentation(order = 90, snippetId = "gallery-images-filter", displayName = "GET /gallery-images/filter", summary = "Filter gallery images", queryParameters = {
+            @DocParameter(name = "organizationId", value = "organization-1"),
+            @DocParameter(name = "mediaId", value = "media-1"),
+            @DocParameter(name = "q", value = "booth"),
+            @DocParameter(name = "minSort", value = "1"),
+            @DocParameter(name = "maxSort", value = "3")
+    }, errorProfiles = ErrorDocProfile.TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<List<GalleryImageResponse>>> filter(
             @RequestParam(required = false) String organizationId,
             @RequestParam(required = false) String mediaId,

@@ -10,9 +10,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
+import com.jobfair.shared.docs.EndpointDocumentationResolver;
+import com.jobfair.shared.docs.ResolvedEndpointDocumentation;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
@@ -24,7 +28,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.tags.Tag;
 
 @Configuration
 public class OpenApiConfig {
@@ -42,26 +45,8 @@ public class OpenApiConfig {
                         new Server().url("http://localhost:8080").description("Local development"),
                         new Server().url("/").description("Relative deployment base URL")
                 ))
-                .tags(List.of(
-                        tag("Articles", "Article publishing, lookup, and filtering endpoints."),
-                        tag("Article images", "Article image associations and filter endpoints."),
-                        tag("Committees", "Committee lifecycle and year-based lookups."),
-                        tag("Committee members", "Committee membership relations and filters."),
-                        tag("Gallery images", "Organization gallery image relations."),
-                        tag("Jobs", "Job listings, search, and activity lookups."),
-                        tag("Media", "Uploaded media assets and metadata."),
-                        tag("Media Outlets", "Media outlet catalog and kind-based queries."),
-                        tag("Media participations", "Media participation records by year and tier."),
-                        tag("Organizations", "Organization catalog, types, and search."),
-                        tag("Package tiers", "Participation package tiers and code lookup."),
-                        tag("Participations", "Organization participation records by year."),
-                        tag("People", "People directory plus CV upload/download endpoints."),
-                        tag("Stat boards", "Stat board catalog, year lookup, and search.")
-                ))
                 .components(new Components()
                         .addSchemas("ApiResponseEnvelope", apiResponseEnvelopeSchema())
-                        .addSchemas("ValidationErrorPayload", validationErrorSchema())
-                        .addSchemas("BinaryDownload", new Schema<>().type("string").format("binary"))
                         .addResponses("BadRequestResponse", commonJsonResponse(
                                 "Bad request",
                                 validationErrorExample("Validation failed", "Request validation or parameter conversion failed.")
@@ -79,19 +64,40 @@ public class OpenApiConfig {
     @Bean
     public OperationCustomizer commonResponseCustomizer() {
         return (operation, handlerMethod) -> {
+            if (isApplicationEndpoint(handlerMethod)) {
+                ResolvedEndpointDocumentation documentation = EndpointDocumentationResolver.resolve(handlerMethod);
+                operation.setSummary(documentation.summary());
+                operation.setDescription(documentation.resource().description());
+                if (documentation.binaryResponse()) {
+                    addBinaryResponse(operation.getResponses());
+                }
+            }
+
             ApiResponses responses = operation.getResponses();
             addResponseIfMissing(responses, "400", componentResponse("BadRequestResponse"));
             addResponseIfMissing(responses, "404", componentResponse("NotFoundResponse"));
             addResponseIfMissing(responses, "500", componentResponse("InternalServerErrorResponse"));
-            addDefaultDescription(operation, handlerMethod);
             return operation;
         };
     }
 
-    private void addDefaultDescription(io.swagger.v3.oas.models.Operation operation, HandlerMethod handlerMethod) {
-        if (operation.getDescription() == null || operation.getDescription().isBlank()) {
-            operation.setDescription("Documented from Spring handler method `" + handlerMethod.getMethod().getName() + "`.");
-        }
+    private boolean isApplicationEndpoint(HandlerMethod handlerMethod) {
+        return handlerMethod.getBeanType().getPackageName().startsWith("com.jobfair.api.controller");
+    }
+
+    private void addBinaryResponse(ApiResponses responses) {
+        responses.addApiResponse("200", new ApiResponse()
+                .description("Returns a downloadable binary file")
+                .content(new Content()
+                        .addMediaType(MediaType.APPLICATION_PDF_VALUE, binaryMediaType())
+                        .addMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE, binaryMediaType()))
+                .addHeaderObject(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        new Header().description("Attachment filename").schema(new Schema<String>().type("string"))));
+    }
+
+    private io.swagger.v3.oas.models.media.MediaType binaryMediaType() {
+        return new io.swagger.v3.oas.models.media.MediaType()
+                .schema(new Schema<String>().type("string").format("binary"));
     }
 
     private void addResponseIfMissing(ApiResponses responses, String code, ApiResponse apiResponse) {
@@ -126,14 +132,6 @@ public class OpenApiConfig {
                 .description("Standard JSON response envelope used across the API.");
     }
 
-    private Schema<?> validationErrorSchema() {
-        return new ObjectSchema()
-                .addProperty("message", new Schema<String>().type("string"))
-                .addProperty("errors", new ObjectSchema()
-                        .additionalProperties(new Schema<String>().type("string")))
-                .description("Field- or parameter-level validation errors.");
-    }
-
     private Map<String, Object> validationErrorExample(String message, String detail) {
         return Map.of(
                 "success", false,
@@ -155,7 +153,4 @@ public class OpenApiConfig {
         return example;
     }
 
-    private Tag tag(String name, String description) {
-        return new Tag().name(name).description(description);
-    }
 }

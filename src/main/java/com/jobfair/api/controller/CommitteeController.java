@@ -14,14 +14,18 @@ import com.jobfair.api.dto.request.CommitteeRequest;
 import com.jobfair.api.dto.response.CommitteeResponse;
 import com.jobfair.domain.service.CommitteeService;
 import com.jobfair.shared.constants.ApiPaths;
+import com.jobfair.shared.docs.ApiResourceDocumentation;
+import com.jobfair.shared.docs.DocParameter;
+import com.jobfair.shared.docs.EndpointDocumentation;
+import com.jobfair.shared.docs.ErrorDocProfile;
 import com.jobfair.shared.response.ApiResponse;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping(ApiPaths.COMMITTEES)
-@Tag(name = "Committees")
+@ApiResourceDocumentation(order = 30, singularName = "committee", pluralName = "committees", sectionTitle = "Committees", snippetPrefix = "committees", sampleId = "committee-1", description = "Committee lifecycle and year-based lookups.")
+@Tag(name = "Committees", description = "Committee lifecycle and year-based lookups.")
 @Validated
 public class CommitteeController extends AbstractCrudController<String, CommitteeRequest, CommitteeResponse> {
 
@@ -33,28 +37,32 @@ public class CommitteeController extends AbstractCrudController<String, Committe
     }
 
     @GetMapping("/year/{year}")
-    @Operation(summary = "Get committee by year")
+    @EndpointDocumentation(order = 70, snippetId = "committees-year", displayName = "GET /committees/year/{year}", summary = "Get committee by year", pathParameters = @DocParameter(name = "year", value = "2026"), errorProfiles = ErrorDocProfile.NOT_FOUND_AND_TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<CommitteeResponse>> year(@PathVariable Integer year) {
         CommitteeResponse payload = committeeService.getByYear(year);
         return ResponseEntity.ok(ApiResponse.success("Committee by year", payload));
     }
 
     @GetMapping("/latest")
-    @Operation(summary = "Get latest committee")
+    @EndpointDocumentation(order = 80, snippetId = "committees-latest", displayName = "GET /committees/latest", summary = "Get latest committee", errorProfiles = ErrorDocProfile.NOT_FOUND)
     public ResponseEntity<ApiResponse<CommitteeResponse>> latest() {
         CommitteeResponse payload = committeeService.getLatest();
         return ResponseEntity.ok(ApiResponse.success("Latest committee", payload));
     }
 
     @GetMapping(params = "q")
-    @Operation(summary = "Search committees")
+    @EndpointDocumentation(order = 90, snippetId = "committees-search", displayName = "GET /committees?q=...", summary = "Search committees", queryParameters = @DocParameter(name = "q", value = "main"))
     public ResponseEntity<ApiResponse<List<CommitteeResponse>>> search(@RequestParam("q") String q) {
         List<CommitteeResponse> payload = committeeService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("Committee search", payload));
     }
 
     @GetMapping("/filter")
-    @Operation(summary = "Filter committees")
+    @EndpointDocumentation(order = 100, snippetId = "committees-filter", displayName = "GET /committees/filter", summary = "Filter committees", queryParameters = {
+            @DocParameter(name = "q", value = "main"),
+            @DocParameter(name = "fromYear", value = "2024"),
+            @DocParameter(name = "toYear", value = "2026")
+    }, errorProfiles = ErrorDocProfile.TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<List<CommitteeResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Integer fromYear,

@@ -14,15 +14,19 @@ import com.jobfair.api.dto.request.ArticleImageRequest;
 import com.jobfair.api.dto.response.ArticleImageResponse;
 import com.jobfair.domain.service.ArticleImageService;
 import com.jobfair.shared.constants.ApiPaths;
+import com.jobfair.shared.docs.ApiResourceDocumentation;
+import com.jobfair.shared.docs.DocParameter;
+import com.jobfair.shared.docs.EndpointDocumentation;
+import com.jobfair.shared.docs.ErrorDocProfile;
 import com.jobfair.shared.response.ApiResponse;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping(ApiPaths.ARTICLE_IMAGES)
-@Tag(name = "Article images")
+@ApiResourceDocumentation(order = 20, singularName = "article image", pluralName = "article images", sectionTitle = "Article Images", snippetPrefix = "article-images", sampleId = "article-image-1", description = "Article image associations and filter endpoints.")
+@Tag(name = "Article Images", description = "Article image associations and filter endpoints.")
 @Validated
 public class ArticleImageController extends AbstractCrudController<String, ArticleImageRequest, ArticleImageResponse> {
 
@@ -34,21 +38,27 @@ public class ArticleImageController extends AbstractCrudController<String, Artic
     }
 
     @GetMapping("/article/{articleId}")
-    @Operation(summary = "Get article images by article ID")
+    @EndpointDocumentation(order = 70, snippetId = "article-images-by-article", displayName = "GET /article-images/article/{articleId}", summary = "Get article images by article ID", pathParameters = @DocParameter(name = "articleId", value = "article-1"))
     public ResponseEntity<ApiResponse<List<ArticleImageResponse>>> article(@PathVariable @NotBlank String articleId) {
         List<ArticleImageResponse> payload = articleImageService.getByArticleId(articleId);
         return ResponseEntity.ok(ApiResponse.success("Article images by article", payload));
     }
 
     @GetMapping("/media/{mediaId}")
-    @Operation(summary = "Get article images by media ID")
+    @EndpointDocumentation(order = 80, snippetId = "article-images-by-media", displayName = "GET /article-images/media/{mediaId}", summary = "Get article images by media ID", pathParameters = @DocParameter(name = "mediaId", value = "media-1"))
     public ResponseEntity<ApiResponse<List<ArticleImageResponse>>> media(@PathVariable @NotBlank String mediaId) {
         List<ArticleImageResponse> payload = articleImageService.getByMediaId(mediaId);
         return ResponseEntity.ok(ApiResponse.success("Article images by media", payload));
     }
 
     @GetMapping("/filter")
-    @Operation(summary = "Filter article images")
+    @EndpointDocumentation(order = 90, snippetId = "article-images-filter", displayName = "GET /article-images/filter", summary = "Filter article images", queryParameters = {
+            @DocParameter(name = "articleId", value = "article-1"),
+            @DocParameter(name = "mediaId", value = "media-1"),
+            @DocParameter(name = "q", value = "banner"),
+            @DocParameter(name = "minSort", value = "1"),
+            @DocParameter(name = "maxSort", value = "3")
+    }, errorProfiles = ErrorDocProfile.TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<List<ArticleImageResponse>>> filter(
             @RequestParam(required = false) String articleId,
             @RequestParam(required = false) String mediaId,
