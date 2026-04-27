@@ -27,9 +27,13 @@ import com.jobfair.api.dto.response.PersonCvFileResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.domain.service.PersonService;
 import com.jobfair.shared.constants.ApiPaths;
+import com.jobfair.shared.docs.ApiResourceDocumentation;
+import com.jobfair.shared.docs.DocParameter;
+import com.jobfair.shared.docs.EndpointDocumentation;
+import com.jobfair.shared.docs.ErrorDocProfile;
+import com.jobfair.shared.docs.MultipartDocSample;
 import com.jobfair.shared.response.ApiResponse;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,7 +45,8 @@ import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping(ApiPaths.PEOPLE)
-@Tag(name = "People")
+@ApiResourceDocumentation(order = 130, singularName = "person", pluralName = "people", sectionTitle = "People", snippetPrefix = "people", sampleId = "person-1", description = "People directory plus CV upload/download endpoints.")
+@Tag(name = "People", description = "People directory plus CV upload/download endpoints.")
 @Validated
 public class PersonController extends AbstractCrudController<String, PersonRequest, PersonResponse> {
 
@@ -54,48 +59,42 @@ public class PersonController extends AbstractCrudController<String, PersonReque
 
     @Override
     @PostMapping
-    @Operation(summary = "Create person")
     public ResponseEntity<ApiResponse<PersonResponse>> create(@Valid @RequestBody PersonRequest request) {
         return super.create(request);
     }
 
     @Override
     @GetMapping
-    @Operation(summary = "Get all people")
     public ResponseEntity<ApiResponse<List<PersonResponse>>> getAll() {
         return super.getAll();
     }
 
     @Override
     @GetMapping("/{id}")
-    @Operation(summary = "Get person by ID")
     public ResponseEntity<ApiResponse<PersonResponse>> getById(@PathVariable String id) {
         return super.getById(id);
     }
 
     @Override
     @PutMapping("/{id}")
-    @Operation(summary = "Update person")
     public ResponseEntity<ApiResponse<PersonResponse>> update(@PathVariable String id, @Valid @RequestBody PersonRequest request) {
         return super.update(id, request);
     }
 
     @Override
     @PatchMapping("/{id}")
-    @Operation(summary = "Patch person")
     public ResponseEntity<ApiResponse<PersonResponse>> patch(@PathVariable String id, @Valid @RequestBody PersonRequest request) {
         return super.patch(id, request);
     }
 
     @Override
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete person")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         return super.delete(id);
     }
 
     @GetMapping("/email")
-    @Operation(summary = "Get person by email")
+    @EndpointDocumentation(order = 70, snippetId = "people-email", displayName = "GET /people/email", summary = "Get person by email", queryParameters = @DocParameter(name = "value", value = "ana@jobfair.test"), errorProfiles = ErrorDocProfile.PEOPLE_EMAIL)
     public ResponseEntity<ApiResponse<PersonResponse>> email(@RequestParam @Email @NotBlank String value) {
         String email = value.trim();
         PersonResponse payload = personService.getByEmail(email);
@@ -103,21 +102,25 @@ public class PersonController extends AbstractCrudController<String, PersonReque
     }
 
     @GetMapping("/role")
-    @Operation(summary = "Get people by role")
+    @EndpointDocumentation(order = 80, snippetId = "people-role", displayName = "GET /people/role", summary = "Get people by role", queryParameters = @DocParameter(name = "value", value = "Coordinator"))
     public ResponseEntity<ApiResponse<List<PersonResponse>>> role(@RequestParam @NotBlank String value) {
         List<PersonResponse> payload = personService.getByPosition(value.trim());
         return ResponseEntity.ok(ApiResponse.success("People by role", payload));
     }
 
     @GetMapping(params = "q")
-    @Operation(summary = "Search people")
+    @EndpointDocumentation(order = 90, snippetId = "people-search", displayName = "GET /people?q=...", summary = "Search people", queryParameters = @DocParameter(name = "q", value = "ana"))
     public ResponseEntity<ApiResponse<List<PersonResponse>>> search(@RequestParam("q") @NotBlank String q) {
         List<PersonResponse> payload = personService.search(q.trim());
         return ResponseEntity.ok(ApiResponse.success("People search", payload));
     }
 
     @GetMapping("/filter")
-    @Operation(summary = "Filter people")
+    @EndpointDocumentation(order = 100, snippetId = "people-filter", displayName = "GET /people/filter", summary = "Filter people", queryParameters = {
+            @DocParameter(name = "q", value = "ana"),
+            @DocParameter(name = "role", value = "Coordinator"),
+            @DocParameter(name = "hasEmail", value = "true")
+    }, errorProfiles = ErrorDocProfile.TYPE_MISMATCH)
     public ResponseEntity<ApiResponse<List<PersonResponse>>> filter(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String role,
@@ -128,20 +131,20 @@ public class PersonController extends AbstractCrudController<String, PersonReque
     }
 
     @PostMapping(value = "/{id}/cv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-        @Operation(summary = "Upload CV PDF for person")
-        @ApiResponses({
+    @EndpointDocumentation(order = 110, snippetId = "people-upload-cv", displayName = "POST /people/{id}/cv", summary = "Upload CV PDF for person", expectedStatus = HttpStatus.CREATED, pathParameters = @DocParameter(name = "id", value = "person-1"), multipart = @MultipartDocSample(enabled = true, fieldName = "file", fileName = "resume.pdf", contentType = MediaType.APPLICATION_PDF_VALUE, content = "sample-pdf"), errorProfiles = ErrorDocProfile.CV_UPLOAD)
+    @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "CV uploaded successfully"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Person not found")
-        })
+    })
     public ResponseEntity<ApiResponse<Void>> uploadCv(@PathVariable String id, @RequestPart("file") MultipartFile file) {
         personService.uploadCv(id, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("CV uploaded successfully", null));
     }
 
     @GetMapping(value = "/{id}/cv", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, MediaType.APPLICATION_PDF_VALUE})
-        @Operation(summary = "Download person CV as PDF")
-        @ApiResponses({
+    @EndpointDocumentation(order = 120, snippetId = "people-get-cv", displayName = "GET /people/{id}/cv", summary = "Download person CV as PDF", pathParameters = @DocParameter(name = "id", value = "person-1"), binaryResponse = true, errorProfiles = ErrorDocProfile.CV_DOWNLOAD)
+    @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                 responseCode = "200",
                 description = "Returns downloadable CV PDF",
@@ -154,7 +157,7 @@ public class PersonController extends AbstractCrudController<String, PersonReque
                 }
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Person or CV not found")
-        })
+    })
     public ResponseEntity<byte[]> getCv(@PathVariable String id) {
         PersonCvFileResponse cvFile = personService.getCv(id);
         String safeFileName = cvFile.fileName() == null ? ("cv-" + id + ".pdf") : cvFile.fileName().replace("\"", "");

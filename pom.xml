@@ -143,6 +143,7 @@
       <properties>
         <snippets.dir>${project.build.directory}/generated-snippets</snippets.dir>
         <generated.docs.dir>${project.build.directory}/generated-docs</generated.docs.dir>
+        <generated.docs.src.dir>${project.build.directory}/generated-docs-src</generated.docs.src.dir>
         <openapi.dir>${project.build.directory}/openapi</openapi.dir>
       </properties>
 
@@ -154,6 +155,7 @@
               <systemPropertyVariables>
                 <spring.profiles.active>test</spring.profiles.active>
                 <org.springframework.restdocs.outputDir>${snippets.dir}</org.springframework.restdocs.outputDir>
+                <jobfair.generatedApiReferencePath>${generated.docs.src.dir}/api-reference.adoc</jobfair.generatedApiReferencePath>
               </systemPropertyVariables>
             </configuration>
           </plugin>
@@ -244,6 +246,7 @@
                   <sourceDocumentName>jobfair-api.adoc</sourceDocumentName>
                   <attributes>
                     <snippets>${snippets.dir}</snippets>
+                    <generatedApiReference>${generated.docs.src.dir}/api-reference.adoc</generatedApiReference>
                     <openapiDir>${openapi.dir}</openapiDir>
                     <pdf-theme>default</pdf-theme>
                     <revnumber>${project.version}</revnumber>

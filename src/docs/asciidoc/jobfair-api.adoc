@@ -4,7 +4,8 @@
 :toclevels: 2
 :sectnums:
 :source-highlighter: rouge
+:docsPartialsDir: {docdir}/partials
 
 include::overview.adoc[]
-include::api-reference.adoc[]
+include::{generatedApiReference}[]
 include::appendices.adoc[]

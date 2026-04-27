@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.jobfair.domain.service.BaseCrudService;
+import com.jobfair.shared.docs.EndpointDocType;
+import com.jobfair.shared.docs.EndpointDocumentation;
+import com.jobfair.shared.docs.ErrorDocProfile;
 import com.jobfair.shared.response.ApiResponse;
 
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 /**
@@ -31,7 +33,7 @@ public abstract class AbstractCrudController<ID, RequestDTO, ResponseDTO> {
     }
 
     @PostMapping
-    @Operation(summary = "Create resource")
+    @EndpointDocumentation(type = EndpointDocType.CREATE, order = 10, expectedStatus = HttpStatus.CREATED, errorProfiles = ErrorDocProfile.JSON_BODY)
     public ResponseEntity<ApiResponse<ResponseDTO>> create(@Valid @RequestBody RequestDTO request) {
         ResponseDTO created = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -39,35 +41,35 @@ public abstract class AbstractCrudController<ID, RequestDTO, ResponseDTO> {
     }
 
     @GetMapping
-    @Operation(summary = "Get all resources")
+    @EndpointDocumentation(type = EndpointDocType.GET_ALL, order = 20)
     public ResponseEntity<ApiResponse<List<ResponseDTO>>> getAll() {
         List<ResponseDTO> payload = service.getAll();
         return ResponseEntity.ok(ApiResponse.success(resourceNamePlural() + " fetched successfully", payload));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get resource by ID")
+    @EndpointDocumentation(type = EndpointDocType.GET_BY_ID, order = 30, errorProfiles = ErrorDocProfile.NOT_FOUND)
     public ResponseEntity<ApiResponse<ResponseDTO>> getById(@PathVariable ID id) {
         ResponseDTO payload = service.getById(id);
         return ResponseEntity.ok(ApiResponse.success(resourceName() + " fetched successfully", payload));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update resource")
+    @EndpointDocumentation(type = EndpointDocType.UPDATE, order = 40, errorProfiles = ErrorDocProfile.JSON_BODY_AND_NOT_FOUND)
     public ResponseEntity<ApiResponse<ResponseDTO>> update(@PathVariable ID id, @Valid @RequestBody RequestDTO request) {
         ResponseDTO payload = service.update(id, request);
         return ResponseEntity.ok(ApiResponse.success(resourceName() + " updated successfully", payload));
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Patch resource")
+    @EndpointDocumentation(type = EndpointDocType.PATCH, order = 50, errorProfiles = ErrorDocProfile.JSON_BODY_AND_NOT_FOUND)
     public ResponseEntity<ApiResponse<ResponseDTO>> patch(@PathVariable ID id, @Valid @RequestBody RequestDTO request) {
         ResponseDTO payload = service.patch(id, request);
         return ResponseEntity.ok(ApiResponse.success(resourceName() + " patched successfully", payload));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete resource")
+    @EndpointDocumentation(type = EndpointDocType.DELETE, order = 60, errorProfiles = ErrorDocProfile.NOT_FOUND)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable ID id) {
         service.delete(id);
         return ResponseEntity.ok(ApiResponse.success(resourceName() + " deleted successfully", null));

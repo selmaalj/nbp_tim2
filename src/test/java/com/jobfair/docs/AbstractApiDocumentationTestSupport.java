@@ -17,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -171,115 +170,86 @@ abstract class AbstractApiDocumentationTestSupport {
                 personService,
                 statBoardService
         );
+        stubAllSuccessResponses();
     }
 
-    protected MockMultipartFile sampleCvFile() {
-        return new MockMultipartFile(
-                "file",
-                "resume.pdf",
-                MediaType.APPLICATION_PDF_VALUE,
-                "sample-pdf".getBytes(StandardCharsets.UTF_8)
-        );
-    }
-
-    protected ArticleRequest articleRequest() {
-        return new ArticleRequest("JobFAIR 2026", "jobfair-2026", "Article body", "https://cdn.jobfair.test/article.png", false, true, SAMPLE_TIME);
+    private void stubAllSuccessResponses() {
+        stubArticleCrud();
+        stubArticleCustom();
+        stubArticleImageCrud();
+        stubArticleImageCustom();
+        stubCommitteeCrud();
+        stubCommitteeCustom();
+        stubCommitteeMemberCrud();
+        stubCommitteeMemberCustom();
+        stubGalleryImageCrud();
+        stubGalleryImageCustom();
+        stubJobCrud();
+        stubJobCustom();
+        stubMediaCrud();
+        stubMediaCustom();
+        stubMediaOutletCrud();
+        stubMediaOutletCustom();
+        stubMediaParticipationCrud();
+        stubMediaParticipationCustom();
+        stubOrganizationCrud();
+        stubOrganizationCustom();
+        stubPackageTierCrud();
+        stubPackageTierCustom();
+        stubParticipationCrud();
+        stubParticipationCustom();
+        stubPersonCrud();
+        stubPersonCustom();
+        stubStatBoardCrud();
+        stubStatBoardCustom();
     }
 
     protected ArticleResponse articleResponse() {
         return new ArticleResponse("article-1", "JobFAIR 2026", "jobfair-2026", "Article body", "https://cdn.jobfair.test/article.png", false, true, SAMPLE_TIME, SAMPLE_TIME);
     }
 
-    protected ArticleImageRequest articleImageRequest() {
-        return new ArticleImageRequest("article-1", "media-1", 1, "Main banner");
-    }
-
     protected ArticleImageResponse articleImageResponse() {
         return new ArticleImageResponse("article-image-1", "article-1", "media-1", 1, "Main banner", SAMPLE_TIME, SAMPLE_TIME);
-    }
-
-    protected CommitteeRequest committeeRequest() {
-        return new CommitteeRequest(2026, "Main committee");
     }
 
     protected CommitteeResponse committeeResponse() {
         return new CommitteeResponse("committee-1", 2026, "Main committee", SAMPLE_TIME, SAMPLE_TIME);
     }
 
-    protected CommitteeMemberRequest committeeMemberRequest() {
-        return new CommitteeMemberRequest("committee-1", "person-1", "Lead");
-    }
-
     protected CommitteeMemberResponse committeeMemberResponse() {
         return new CommitteeMemberResponse("committee-member-1", "committee-1", "person-1", "Lead", SAMPLE_TIME, SAMPLE_TIME);
-    }
-
-    protected GalleryImageRequest galleryImageRequest() {
-        return new GalleryImageRequest("organization-1", "media-1", 1, "Booth photo");
     }
 
     protected GalleryImageResponse galleryImageResponse() {
         return new GalleryImageResponse("gallery-image-1", "organization-1", "media-1", 1, "Booth photo", SAMPLE_TIME, SAMPLE_TIME);
     }
 
-    protected JobRequest jobRequest() {
-        return new JobRequest("Java Developer", "java-developer", "Build backend services", "https://jobs.jobfair.test/apply", "hr@jobfair.test", SAMPLE_TIME, SAMPLE_TIME.plusDays(30));
-    }
-
     protected JobResponse jobResponse() {
         return new JobResponse("job-1", "Java Developer", "java-developer", "Build backend services", "https://jobs.jobfair.test/apply", "hr@jobfair.test", SAMPLE_TIME, SAMPLE_TIME.plusDays(30), SAMPLE_TIME);
-    }
-
-    protected MediaRequest mediaRequest() {
-        return new MediaRequest("https://cdn.jobfair.test/media.png");
     }
 
     protected MediaResponse mediaResponse() {
         return new MediaResponse("media-1", "https://cdn.jobfair.test/media.png", 1920, 1080, 512000, "image/png", SAMPLE_TIME);
     }
 
-    protected MediaOutletRequest mediaOutletRequest() {
-        return new MediaOutletRequest("Daily News", "daily-news", "https://dailynews.test", MediaKind.ONLINE);
-    }
-
     protected MediaOutletResponse mediaOutletResponse() {
         return new MediaOutletResponse("outlet-1", "Daily News", "daily-news", "https://dailynews.test", MediaKind.ONLINE, SAMPLE_TIME);
-    }
-
-    protected MediaParticipationRequest mediaParticipationRequest() {
-        return new MediaParticipationRequest("outlet-1", 2026, MediaTier.GOLD);
     }
 
     protected MediaParticipationResponse mediaParticipationResponse() {
         return new MediaParticipationResponse("media-participation-1", "outlet-1", 2026, MediaTier.GOLD, SAMPLE_TIME, SAMPLE_TIME);
     }
 
-    protected OrganizationRequest organizationRequest() {
-        return new OrganizationRequest(OrganizationType.COMPANY, "Tech Corp", "tech-corp", "https://techcorp.test", "Main sponsor");
-    }
-
     protected OrganizationResponse organizationResponse() {
         return new OrganizationResponse("organization-1", OrganizationType.COMPANY, "Tech Corp", "tech-corp", "https://techcorp.test", "Main sponsor", SAMPLE_TIME);
-    }
-
-    protected PackageTierRequest packageTierRequest() {
-        return new PackageTierRequest("Gold package", "GOLD", "Top-tier participation package");
     }
 
     protected PackageTierResponse packageTierResponse() {
         return new PackageTierResponse("package-tier-1", "Gold package", "GOLD", "Top-tier participation package", SAMPLE_TIME, SAMPLE_TIME);
     }
 
-    protected ParticipationRequest participationRequest() {
-        return new ParticipationRequest("organization-1", "package-tier-1", 2026);
-    }
-
     protected ParticipationResponse participationResponse() {
         return new ParticipationResponse("participation-1", "organization-1", "package-tier-1", 2026, SAMPLE_TIME, SAMPLE_TIME);
-    }
-
-    protected PersonRequest personRequest() {
-        return new PersonRequest("Ana", "Anic", "ana@jobfair.test", "+38761111222", "Coordinator");
     }
 
     protected PersonResponse personResponse() {
@@ -288,10 +258,6 @@ abstract class AbstractApiDocumentationTestSupport {
 
     protected PersonCvFileResponse personCvFileResponse() {
         return new PersonCvFileResponse("pdf-content".getBytes(StandardCharsets.UTF_8), "resume.pdf", MediaType.APPLICATION_PDF_VALUE);
-    }
-
-    protected StatBoardRequest statBoardRequest() {
-        return new StatBoardRequest("overview-2026", "Overview 2026", 2026, "Headline metrics");
     }
 
     protected StatBoardResponse statBoardResponse() {
