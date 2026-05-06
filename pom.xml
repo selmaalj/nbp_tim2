@@ -116,6 +116,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -132,6 +133,15 @@
               <version>${mapstruct.version}</version>
             </path>
           </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>11.7.2</version>
+        <configuration>
+          <configFiles>.env</configFiles>
         </configuration>
       </plugin>
     </plugins>

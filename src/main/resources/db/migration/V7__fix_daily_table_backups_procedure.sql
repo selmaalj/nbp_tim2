@@ -1,0 +1,17 @@
+CREATE OR REPLACE PROCEDURE NBPT2.run_table_backups AS
+BEGIN
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE NBPT2.people_bkp';
+    INSERT INTO NBPT2.people_bkp
+    SELECT * FROM NBPT2.people;
+
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE NBPT2.organizations_bkp';
+    INSERT INTO NBPT2.organizations_bkp
+    SELECT * FROM NBPT2.organizations;
+
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE NBPT2.jobs_bkp';
+    INSERT INTO NBPT2.jobs_bkp
+    SELECT * FROM NBPT2.jobs;
+
+    COMMIT;
+END;
+/
