@@ -24,6 +24,7 @@ class LogMongoRepositoryTest {
     private static MongoDBContainer mongo;
 
     @DynamicPropertySource
+    @SuppressWarnings("unused")
     static void mongoProperties(DynamicPropertyRegistry registry) {
         Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker is required for Mongo integration tests");
         mongo = new MongoDBContainer("mongo:7.0.12");

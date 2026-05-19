@@ -46,6 +46,7 @@ class LogServiceImplTest {
     private LogServiceImpl service;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
         service = new LogServiceImpl(auditLogRepository, messageLogRepository, notificationLogRepository, statusHistoryRepository);
     }
