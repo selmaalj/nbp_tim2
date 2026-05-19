@@ -17,6 +17,26 @@ Spring Boot backend template sa generickim CRUD temeljom i jasnom podjelom sloje
 - Globalni exception handling i standardizovan API response
 - OpenAPI/Swagger dokumentacija
 
+## MongoDB lokalni sloj
+
+MongoDB se koristi za audit/status logove kroz kolekcije:
+- audit_logs
+- message_logs
+- notification_logs
+- status_histories
+
+Lokalno pokretanje:
+1. Pokreni MongoDB sa Docker Compose: `docker compose up -d mongodb`
+2. Provjeri da je `MONGODB_URI` postavljen u `.env`
+3. Aplikacija se spaja na `spring.data.mongodb.uri`
+
+Mongo CRUD endpointi:
+- `GET /logs`
+- `GET /logs/{id}`
+- `POST /logs`
+- `PUT /logs/{id}`
+- `DELETE /logs/{id}`
+
 ## Kratko uputstvo za novi entitet
 
 Prati Example kao sablon, korak po korak:

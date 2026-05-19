@@ -5,6 +5,15 @@ spring:
     import: optional:file:.env[.properties]
   profiles:
     default: local
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/jobfair_logs}
+  flyway:
+    out-of-order: true
+    validateOnMigrate: false
+    placeholderReplacement: false
+    ignoreFutureMigrations: true
+    ignoreIgnoredMigrations: true
 
 server:
   port: 8080
