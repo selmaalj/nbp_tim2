@@ -117,14 +117,12 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>1.20.4</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mongodb</artifactId>
-      <version>1.20.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -158,7 +156,6 @@
       <plugin>
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-maven-plugin</artifactId>
-        <version>11.7.2</version>
         <configuration>
           <configFiles>.env</configFiles>
           <url>jdbc:oracle:thin:@ora-02.db.lab.etf.unsa.ba:1521:ETFDB</url>

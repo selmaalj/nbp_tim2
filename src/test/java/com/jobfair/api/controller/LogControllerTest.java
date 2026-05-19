@@ -32,8 +32,9 @@ class LogControllerTest {
         ResponseEntity<ApiResponse<List<LogResponse>>> result = controller.getAll();
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertNotNull(result.getBody());
-        assertEquals(1, result.getBody().data().size());
+        ApiResponse<List<LogResponse>> body = result.getBody();
+        assertNotNull(body);
+        assertEquals(1, body.data().size());
         verify(logService).getAll();
     }
 
@@ -45,7 +46,9 @@ class LogControllerTest {
         ResponseEntity<ApiResponse<LogResponse>> result = controller.getById("1");
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(response, result.getBody().data());
+        ApiResponse<LogResponse> body = result.getBody();
+        assertNotNull(body);
+        assertEquals(response, body.data());
     }
 
     @Test
@@ -57,7 +60,9 @@ class LogControllerTest {
         ResponseEntity<ApiResponse<LogResponse>> result = controller.create(request);
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
-        assertEquals(response, result.getBody().data());
+        ApiResponse<LogResponse> body = result.getBody();
+        assertNotNull(body);
+        assertEquals(response, body.data());
     }
 
     @Test
@@ -69,7 +74,9 @@ class LogControllerTest {
         ResponseEntity<ApiResponse<LogResponse>> result = controller.update("3", request);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(response, result.getBody().data());
+        ApiResponse<LogResponse> body = result.getBody();
+        assertNotNull(body);
+        assertEquals(response, body.data());
     }
 
     @Test
@@ -77,7 +84,9 @@ class LogControllerTest {
         ResponseEntity<ApiResponse<Void>> result = controller.delete("99");
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals("Log deleted successfully", result.getBody().message());
+        ApiResponse<Void> body = result.getBody();
+        assertNotNull(body);
+        assertEquals("Log deleted successfully", body.message());
         verify(logService).delete("99");
     }
 }

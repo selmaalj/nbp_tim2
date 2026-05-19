@@ -88,7 +88,7 @@ public class LogServiceImpl implements LogService {
         ResolvedLog resolved = resolveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Log not found with id: " + id));
 
-        if (request.type() != null && request.type() != resolved.type()) {
+        if (request.type() != resolved.type()) {
             throw new IllegalArgumentException("Log type cannot be changed once stored");
         }
 
@@ -106,11 +106,7 @@ public class LogServiceImpl implements LogService {
     }
 
     private void applyRequest(BaseLogDocument target, LogRequest request, boolean createMode) {
-        if (request.oracleUserId() != null) {
-            target.setOracleUserId(request.oracleUserId());
-        } else if (createMode) {
-            throw new IllegalArgumentException("Oracle user ID is required");
-        }
+        target.setOracleUserId(request.oracleUserId());
 
         if (request.title() != null && !request.title().isBlank()) {
             target.setTitle(request.title().trim());
@@ -161,8 +157,10 @@ public class LogServiceImpl implements LogService {
         if (document instanceof StatusHistory statusHistory) {
             return statusHistoryRepository.save(statusHistory);
         }
-
-        throw new IllegalStateException("Unsupported log document type: " + document.getClass().getName());
+        if (document != null) {
+            throw new IllegalStateException("Unsupported log document type: " + document.getClass().getName());
+        }
+        throw new IllegalStateException("Log document cannot be null");
     }
 
     private void delete(BaseLogDocument document, LogType type) {
@@ -182,8 +180,10 @@ public class LogServiceImpl implements LogService {
             statusHistoryRepository.delete(statusHistory);
             return;
         }
-
-        throw new IllegalStateException("Unsupported log document type: " + document.getClass().getName());
+        if (document != null) {
+            throw new IllegalStateException("Unsupported log document type: " + document.getClass().getName());
+        }
+        throw new IllegalStateException("Log document cannot be null");
     }
 
     private LogResponse toResponse(BaseLogDocument document, LogType type) {

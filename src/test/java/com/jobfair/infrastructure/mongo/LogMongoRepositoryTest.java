@@ -4,9 +4,7 @@ import java.time.Instant;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -25,22 +23,11 @@ class LogMongoRepositoryTest {
 
     private static MongoDBContainer mongo;
 
-    @BeforeAll
-    static void startMongo() {
+    @DynamicPropertySource
+    static void mongoProperties(DynamicPropertyRegistry registry) {
         Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker is required for Mongo integration tests");
         mongo = new MongoDBContainer("mongo:7.0.12");
         mongo.start();
-    }
-
-    @AfterAll
-    static void stopMongo() {
-        if (mongo != null) {
-            mongo.stop();
-        }
-    }
-
-    @DynamicPropertySource
-    static void mongoProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", () -> mongo.getReplicaSetUrl());
     }
 

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.jobfair.api.dto.request.LogRequest;
@@ -22,7 +22,6 @@ import com.jobfair.domain.model.log.AuditLog;
 import com.jobfair.domain.model.log.LogType;
 import com.jobfair.domain.model.log.MessageLog;
 import com.jobfair.domain.model.log.NotificationLog;
-import com.jobfair.domain.model.log.StatusHistory;
 import com.jobfair.domain.repository.log.AuditLogRepository;
 import com.jobfair.domain.repository.log.MessageLogRepository;
 import com.jobfair.domain.repository.log.NotificationLogRepository;
