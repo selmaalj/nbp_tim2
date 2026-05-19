@@ -2,6 +2,7 @@ package com.jobfair.application.serviceImpl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -10,25 +11,69 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.jobfair.api.dto.request.PersonRequest;
 import com.jobfair.api.dto.response.PersonCvFileResponse;
+import com.jobfair.api.dto.response.PersonLogsResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.domain.model.Person;
 import com.jobfair.domain.repository.PersonRepository;
+import com.jobfair.domain.service.LogService;
 import com.jobfair.domain.service.PersonService;
 import com.jobfair.infrastructure.mapper.PersonMapper;
 import com.jobfair.shared.exception.ResourceNotFoundException;
 
 @Service
+@Transactional
 public class PersonServiceImpl
         extends AbstractCrudService<Person, String, PersonRequest, PersonResponse>
         implements PersonService {
 
     private final PersonRepository repository;
     private final PersonMapper mapper;
+    private final LogService logService;
 
-    public PersonServiceImpl(PersonRepository repository, PersonMapper mapper) {
+    public PersonServiceImpl(PersonRepository repository, PersonMapper mapper, LogService logService) {
         super(repository, mapper);
         this.repository = repository;
         this.mapper = mapper;
+        this.logService = logService;
+    }
+
+    @Override
+    public PersonResponse create(PersonRequest request) {
+        validateForCreate(request);
+        Person entity = mapper.toEntity(request);
+        Person saved = repository.save(entity);
+        PersonResponse response = mapper.toResponse(saved);
+        logService.auditPersonAction(saved.getId(), "Person created", "Person record created", "SUCCESS", auditDetails("CREATE", saved));
+        return response;
+    }
+
+    @Override
+    public PersonResponse update(String id, PersonRequest request) {
+        validateForUpdate(request);
+        Person existing = findOrThrow(id);
+        mapper.updateEntity(existing, request);
+        Person saved = repository.save(existing);
+        PersonResponse response = mapper.toResponse(saved);
+        logService.auditPersonAction(saved.getId(), "Person updated", "Person record updated", "SUCCESS", auditDetails("UPDATE", saved));
+        return response;
+    }
+
+    @Override
+    public PersonResponse patch(String id, PersonRequest request) {
+        Person existing = findOrThrow(id);
+        mapper.patchEntity(existing, request);
+        validateAfterPatch(existing);
+        Person saved = repository.save(existing);
+        PersonResponse response = mapper.toResponse(saved);
+        logService.auditPersonAction(saved.getId(), "Person patched", "Person record patched", "SUCCESS", auditDetails("PATCH", saved));
+        return response;
+    }
+
+    @Override
+    public void delete(String id) {
+        Person existing = findOrThrow(id);
+        logService.auditPersonAction(existing.getId(), "Person deleted", "Person record deleted", "SUCCESS", auditDetails("DELETE", existing));
+        repository.delete(existing);
     }
 
     @Override
@@ -92,6 +137,12 @@ public class PersonServiceImpl
         person.setCvFileName(resolveFileName(personId, originalFileName));
         person.setCvMimeType(MediaType.APPLICATION_PDF_VALUE);
         repository.save(person);
+        logService.auditPersonAction(personId, "Person CV uploaded", "Person CV uploaded", "SUCCESS", Map.of(
+                "entity", "person",
+                "action", "UPLOAD_CV",
+                "fileName", person.getCvFileName(),
+                "mimeType", person.getCvMimeType()
+        ));
     }
 
     @Override
@@ -109,6 +160,35 @@ public class PersonServiceImpl
                 : person.getCvMimeType();
 
         return new PersonCvFileResponse(cvContent, fileName, mimeType);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PersonLogsResponse getLogs(String personId) {
+        Person person = findOrThrow(personId);
+        return new PersonLogsResponse(mapper.toResponse(person), logService.getByPersonId(personId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PersonLogsResponse getStatusHistory(String personId) {
+        Person person = findOrThrow(personId);
+        return new PersonLogsResponse(mapper.toResponse(person), logService.getStatusHistoryByPersonId(personId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PersonLogsResponse getNotifications(String personId) {
+        Person person = findOrThrow(personId);
+        return new PersonLogsResponse(mapper.toResponse(person), logService.getNotificationsByPersonId(personId));
+    }
+
+    private Map<String, Object> auditDetails(String action, Person person) {
+        return Map.of(
+                "entity", "person",
+                "action", action,
+                "personId", person.getId()
+        );
     }
 
     private String resolveFileName(String personId, String originalFileName) {

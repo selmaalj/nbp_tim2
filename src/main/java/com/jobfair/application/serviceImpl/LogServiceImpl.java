@@ -15,6 +15,7 @@ import com.jobfair.domain.model.log.LogType;
 import com.jobfair.domain.model.log.MessageLog;
 import com.jobfair.domain.model.log.NotificationLog;
 import com.jobfair.domain.model.log.StatusHistory;
+import com.jobfair.domain.repository.PersonRepository;
 import com.jobfair.domain.repository.log.AuditLogRepository;
 import com.jobfair.domain.repository.log.MessageLogRepository;
 import com.jobfair.domain.repository.log.NotificationLogRepository;
@@ -30,21 +31,25 @@ public class LogServiceImpl implements LogService {
     private final MessageLogRepository messageLogRepository;
     private final NotificationLogRepository notificationLogRepository;
     private final StatusHistoryRepository statusHistoryRepository;
+    private final PersonRepository personRepository;
 
     public LogServiceImpl(
             AuditLogRepository auditLogRepository,
             MessageLogRepository messageLogRepository,
             NotificationLogRepository notificationLogRepository,
-            StatusHistoryRepository statusHistoryRepository
+            StatusHistoryRepository statusHistoryRepository,
+            PersonRepository personRepository
     ) {
         this.auditLogRepository = auditLogRepository;
         this.messageLogRepository = messageLogRepository;
         this.notificationLogRepository = notificationLogRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+        this.personRepository = personRepository;
     }
 
     @Override
     public LogResponse create(LogRequest request) {
+        validatePersonExists(request.oraclePersonId());
         BaseLogDocument document = createDocument(request.type());
         applyRequest(document, request, true);
         BaseLogDocument saved = save(document);
@@ -85,6 +90,7 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public LogResponse update(String id, LogRequest request) {
+        validatePersonExists(request.oraclePersonId());
         ResolvedLog resolved = resolveById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Log not found with id: " + id));
 
@@ -105,8 +111,50 @@ public class LogServiceImpl implements LogService {
         delete(resolved.document(), resolved.type());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<LogResponse> getByPersonId(String personId) {
+        validatePersonExists(personId);
+        List<LogResponse> payload = new ArrayList<>();
+        auditLogRepository.findByOraclePersonIdOrderByCreatedAtDesc(personId).forEach(document -> payload.add(toResponse(document, LogType.AUDIT)));
+        messageLogRepository.findByOraclePersonIdOrderByCreatedAtDesc(personId).forEach(document -> payload.add(toResponse(document, LogType.MESSAGE)));
+        notificationLogRepository.findByOraclePersonIdOrderByCreatedAtDesc(personId).forEach(document -> payload.add(toResponse(document, LogType.NOTIFICATION)));
+        statusHistoryRepository.findByOraclePersonIdOrderByCreatedAtDesc(personId).forEach(document -> payload.add(toResponse(document, LogType.STATUS_HISTORY)));
+        return sortByCreatedAtDesc(payload);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LogResponse> getStatusHistoryByPersonId(String personId) {
+        validatePersonExists(personId);
+        return statusHistoryRepository.findByOraclePersonIdOrderByCreatedAtDesc(personId).stream()
+                .map(document -> toResponse(document, LogType.STATUS_HISTORY))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LogResponse> getNotificationsByPersonId(String personId) {
+        validatePersonExists(personId);
+        return notificationLogRepository.findByOraclePersonIdOrderByCreatedAtDesc(personId).stream()
+                .map(document -> toResponse(document, LogType.NOTIFICATION))
+                .toList();
+    }
+
+    @Override
+    public void auditPersonAction(String personId, String title, String message, String status, java.util.Map<String, Object> details) {
+        validatePersonExists(personId);
+        AuditLog document = new AuditLog();
+        document.setOraclePersonId(personId);
+        document.setTitle(title);
+        document.setMessage(message);
+        document.setStatus(status);
+        document.setDetails(details == null ? new LinkedHashMap<>() : new LinkedHashMap<>(details));
+        auditLogRepository.save(document);
+    }
+
     private void applyRequest(BaseLogDocument target, LogRequest request, boolean createMode) {
-        target.setOracleUserId(request.oracleUserId());
+        target.setOraclePersonId(request.oraclePersonId().trim());
 
         if (request.title() != null && !request.title().isBlank()) {
             target.setTitle(request.title().trim());
@@ -190,7 +238,7 @@ public class LogServiceImpl implements LogService {
         return new LogResponse(
                 document.getId(),
                 type,
-                document.getOracleUserId(),
+                document.getOraclePersonId(),
                 document.getTitle(),
                 document.getMessage(),
                 document.getStatus(),
@@ -222,6 +270,32 @@ public class LogServiceImpl implements LogService {
         }
 
         return java.util.Optional.empty();
+    }
+
+    private void validatePersonExists(String personId) {
+        if (personId == null || personId.isBlank()) {
+            throw new IllegalArgumentException("Oracle person ID is required");
+        }
+        if (!personRepository.existsById(personId.trim())) {
+            throw new ResourceNotFoundException("Person not found with id: " + personId.trim());
+        }
+    }
+
+    private List<LogResponse> sortByCreatedAtDesc(List<LogResponse> payload) {
+        return payload.stream()
+                .sorted((left, right) -> {
+                    if (left.createdAt() == null && right.createdAt() == null) {
+                        return 0;
+                    }
+                    if (left.createdAt() == null) {
+                        return 1;
+                    }
+                    if (right.createdAt() == null) {
+                        return -1;
+                    }
+                    return right.createdAt().compareTo(left.createdAt());
+                })
+                .toList();
     }
 
     private record ResolvedLog(BaseLogDocument document, LogType type) {

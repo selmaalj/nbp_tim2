@@ -23,8 +23,8 @@ public abstract class BaseLogDocument {
     @Id
     private String id;
 
-    @Field("oracle_user_id")
-    private Integer oracleUserId;
+    @Field("oracle_person_id")
+    private String oraclePersonId;
 
     @Field("title")
     private String title;

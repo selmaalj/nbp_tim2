@@ -59,7 +59,7 @@ public class LogController {
 
     @PostMapping
     @Operation(summary = "Create a Mongo log entry")
-    @EndpointDocumentation(order = 120, snippetId = "logs-create", displayName = "POST /logs", summary = "Create a log entry")
+    @EndpointDocumentation(order = 120, snippetId = "logs-create", displayName = "POST /logs", summary = "Create a log entry", requestBodyType = LogRequest.class)
     public ResponseEntity<ApiResponse<LogResponse>> create(@Valid @RequestBody LogRequest request) {
         LogResponse payload = logService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -68,7 +68,7 @@ public class LogController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Replace a Mongo log entry")
-    @EndpointDocumentation(order = 130, snippetId = "logs-update", displayName = "PUT /logs/{id}", summary = "Replace a log entry", pathParameters = @DocParameter(name = "id", value = "log-1"), errorProfiles = ErrorDocProfile.NOT_FOUND)
+    @EndpointDocumentation(order = 130, snippetId = "logs-update", displayName = "PUT /logs/{id}", summary = "Replace a log entry", pathParameters = @DocParameter(name = "id", value = "log-1"), errorProfiles = ErrorDocProfile.NOT_FOUND, requestBodyType = LogRequest.class)
     public ResponseEntity<ApiResponse<LogResponse>> update(@PathVariable String id, @Valid @RequestBody LogRequest request) {
         LogResponse payload = logService.update(id, request);
         return ResponseEntity.ok(ApiResponse.success("Log updated successfully", payload));

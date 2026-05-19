@@ -111,6 +111,9 @@ public final class EndpointDocumentationResolver {
     }
 
     private static Class<?> requestBodyType(Class<?> beanType, EndpointDocumentation endpoint) {
+        if (endpoint.requestBodyType() != Void.class) {
+            return endpoint.requestBodyType();
+        }
         if (!List.of(EndpointDocType.CREATE, EndpointDocType.UPDATE, EndpointDocType.PATCH).contains(endpoint.type())) {
             return null;
         }

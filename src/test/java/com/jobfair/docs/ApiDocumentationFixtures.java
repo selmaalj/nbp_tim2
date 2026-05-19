@@ -13,6 +13,7 @@ import com.jobfair.api.dto.request.CommitteeMemberRequest;
 import com.jobfair.api.dto.request.CommitteeRequest;
 import com.jobfair.api.dto.request.GalleryImageRequest;
 import com.jobfair.api.dto.request.JobRequest;
+import com.jobfair.api.dto.request.LogRequest;
 import com.jobfair.api.dto.request.MediaOutletRequest;
 import com.jobfair.api.dto.request.MediaParticipationRequest;
 import com.jobfair.api.dto.request.MediaRequest;
@@ -24,6 +25,7 @@ import com.jobfair.api.dto.request.StatBoardRequest;
 import com.jobfair.domain.model.enums.MediaKind;
 import com.jobfair.domain.model.enums.MediaTier;
 import com.jobfair.domain.model.enums.OrganizationType;
+import com.jobfair.domain.model.log.LogType;
 import com.jobfair.shared.docs.MultipartDocSample;
 
 final class ApiDocumentationFixtures {
@@ -36,6 +38,7 @@ final class ApiDocumentationFixtures {
             Map.entry(CommitteeMemberRequest.class, new CommitteeMemberRequest("committee-1", "person-1", "Lead")),
             Map.entry(GalleryImageRequest.class, new GalleryImageRequest("organization-1", "media-1", 1, "Booth photo")),
             Map.entry(JobRequest.class, new JobRequest("Java Developer", "java-developer", "Build backend services", "https://jobs.jobfair.test/apply", "hr@jobfair.test", SAMPLE_TIME, SAMPLE_TIME.plusDays(30))),
+            Map.entry(LogRequest.class, new LogRequest(LogType.AUDIT, "person-1", "Person updated", "Person record updated", "SUCCESS", Map.of("entity", "person"))),
             Map.entry(MediaRequest.class, new MediaRequest("https://cdn.jobfair.test/media.png")),
             Map.entry(MediaOutletRequest.class, new MediaOutletRequest("Daily News", "daily-news", "https://dailynews.test", MediaKind.ONLINE)),
             Map.entry(MediaParticipationRequest.class, new MediaParticipationRequest("outlet-1", 2026, MediaTier.GOLD)),

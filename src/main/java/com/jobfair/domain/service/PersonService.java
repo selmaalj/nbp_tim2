@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.jobfair.api.dto.request.PersonRequest;
 import com.jobfair.api.dto.response.PersonCvFileResponse;
+import com.jobfair.api.dto.response.PersonLogsResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.domain.model.Person;
 
@@ -22,4 +23,10 @@ public interface PersonService extends BaseCrudService<Person, String, PersonReq
 	void uploadCv(String personId, MultipartFile file);
 
 	PersonCvFileResponse getCv(String personId);
+
+	PersonLogsResponse getLogs(String personId);
+
+	PersonLogsResponse getStatusHistory(String personId);
+
+	PersonLogsResponse getNotifications(String personId);
 }

@@ -26,7 +26,7 @@ class LogControllerTest {
 
     @Test
     void getAllReturnsPayload() {
-        LogResponse response = new LogResponse("1", LogType.AUDIT, 100, "Created", "User created", "SUCCESS", Map.of("entity", "person"), Instant.now(), Instant.now());
+        LogResponse response = new LogResponse("1", LogType.AUDIT, "person-1", "Created", "User created", "SUCCESS", Map.of("entity", "person"), Instant.now(), Instant.now());
         when(logService.getAll()).thenReturn(List.of(response));
 
         ResponseEntity<ApiResponse<List<LogResponse>>> result = controller.getAll();
@@ -40,7 +40,7 @@ class LogControllerTest {
 
     @Test
     void getByIdReturnsPayload() {
-        LogResponse response = new LogResponse("1", LogType.MESSAGE, 100, "Message", "Sent", "DELIVERED", Map.of(), Instant.now(), Instant.now());
+        LogResponse response = new LogResponse("1", LogType.MESSAGE, "person-1", "Message", "Sent", "DELIVERED", Map.of(), Instant.now(), Instant.now());
         when(logService.getById("1")).thenReturn(response);
 
         ResponseEntity<ApiResponse<LogResponse>> result = controller.getById("1");
@@ -53,8 +53,8 @@ class LogControllerTest {
 
     @Test
     void createReturnsCreated() {
-        LogRequest request = new LogRequest(LogType.NOTIFICATION, 11, "Notify", "Sent", "DONE", Map.of("channel", "email"));
-        LogResponse response = new LogResponse("2", LogType.NOTIFICATION, 11, "Notify", "Sent", "DONE", Map.of("channel", "email"), Instant.now(), Instant.now());
+        LogRequest request = new LogRequest(LogType.NOTIFICATION, "person-1", "Notify", "Sent", "DONE", Map.of("channel", "email"));
+        LogResponse response = new LogResponse("2", LogType.NOTIFICATION, "person-1", "Notify", "Sent", "DONE", Map.of("channel", "email"), Instant.now(), Instant.now());
         when(logService.create(request)).thenReturn(response);
 
         ResponseEntity<ApiResponse<LogResponse>> result = controller.create(request);
@@ -67,8 +67,8 @@ class LogControllerTest {
 
     @Test
     void updateReturnsPayload() {
-        LogRequest request = new LogRequest(LogType.STATUS_HISTORY, 22, "Status", "Moved", "ARCHIVED", Map.of());
-        LogResponse response = new LogResponse("3", LogType.STATUS_HISTORY, 22, "Status", "Moved", "ARCHIVED", Map.of(), Instant.now(), Instant.now());
+        LogRequest request = new LogRequest(LogType.STATUS_HISTORY, "person-1", "Status", "Moved", "ARCHIVED", Map.of());
+        LogResponse response = new LogResponse("3", LogType.STATUS_HISTORY, "person-1", "Status", "Moved", "ARCHIVED", Map.of(), Instant.now(), Instant.now());
         when(logService.update("3", request)).thenReturn(response);
 
         ResponseEntity<ApiResponse<LogResponse>> result = controller.update("3", request);

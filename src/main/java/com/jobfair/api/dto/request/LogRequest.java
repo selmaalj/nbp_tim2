@@ -11,8 +11,8 @@ public record LogRequest(
         @NotNull(message = "Log type is required")
         LogType type,
 
-        @NotNull(message = "Oracle user ID is required")
-        Integer oracleUserId,
+        @NotBlank(message = "Oracle person ID is required")
+        String oraclePersonId,
 
         @NotBlank(message = "Title is required")
         String title,

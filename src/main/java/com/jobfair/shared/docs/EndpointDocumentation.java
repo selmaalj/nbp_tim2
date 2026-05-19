@@ -31,4 +31,6 @@ public @interface EndpointDocumentation {
     DocParameter[] queryParameters() default {};
 
     MultipartDocSample multipart() default @MultipartDocSample;
+
+    Class<?> requestBodyType() default Void.class;
 }

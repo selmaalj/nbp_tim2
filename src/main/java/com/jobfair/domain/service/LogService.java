@@ -16,4 +16,12 @@ public interface LogService {
     LogResponse update(String id, LogRequest request);
 
     void delete(String id);
+
+    List<LogResponse> getByPersonId(String personId);
+
+    List<LogResponse> getStatusHistoryByPersonId(String personId);
+
+    List<LogResponse> getNotificationsByPersonId(String personId);
+
+    void auditPersonAction(String personId, String title, String message, String status, java.util.Map<String, Object> details);
 }

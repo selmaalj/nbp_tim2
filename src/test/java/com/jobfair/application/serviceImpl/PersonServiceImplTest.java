@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.anyMap;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
@@ -20,9 +21,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jobfair.api.dto.response.PersonCvFileResponse;
+import com.jobfair.api.dto.request.PersonRequest;
+import com.jobfair.api.dto.response.LogResponse;
+import com.jobfair.api.dto.response.PersonLogsResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.domain.model.Person;
+import com.jobfair.domain.model.log.LogType;
 import com.jobfair.domain.repository.PersonRepository;
+import com.jobfair.domain.service.LogService;
 import com.jobfair.infrastructure.mapper.PersonMapper;
 import com.jobfair.shared.exception.ResourceNotFoundException;
 
@@ -35,12 +41,62 @@ class PersonServiceImplTest {
     @Mock
     private PersonMapper mapper;
 
+    @Mock
+    private LogService logService;
+
     private PersonServiceImpl service;
 
     @BeforeEach
     @SuppressWarnings("unused")
     void setUp() {
-        service = new PersonServiceImpl(repository, mapper);
+        service = new PersonServiceImpl(repository, mapper, logService);
+    }
+
+    @Test
+    void createStoresPersonAndWritesAuditLog() {
+        PersonRequest request = new PersonRequest("Ana", "Anic", "ana@mail.com", null, "Coordinator");
+        Person person = new Person();
+        person.setId("person-1");
+        PersonResponse response = new PersonResponse("person-1", "Ana", "Anic", "ana@mail.com", null, "Coordinator", null);
+
+        when(mapper.toEntity(request)).thenReturn(person);
+        when(repository.save(person)).thenReturn(person);
+        when(mapper.toResponse(person)).thenReturn(response);
+
+        PersonResponse result = service.create(request);
+
+        assertEquals(response, result);
+        verify(logService).auditPersonAction(eq("person-1"), eq("Person created"), eq("Person record created"), eq("SUCCESS"), anyMap());
+    }
+
+    @Test
+    void updateStoresPersonAndWritesAuditLog() {
+        PersonRequest request = new PersonRequest("Ana", "Anic", "ana@mail.com", null, "Lead");
+        Person person = new Person();
+        person.setId("person-1");
+        PersonResponse response = new PersonResponse("person-1", "Ana", "Anic", "ana@mail.com", null, "Lead", null);
+
+        when(repository.findById("person-1")).thenReturn(Optional.of(person));
+        when(repository.save(person)).thenReturn(person);
+        when(mapper.toResponse(person)).thenReturn(response);
+
+        PersonResponse result = service.update("person-1", request);
+
+        assertEquals(response, result);
+        verify(mapper).updateEntity(person, request);
+        verify(logService).auditPersonAction(eq("person-1"), eq("Person updated"), eq("Person record updated"), eq("SUCCESS"), anyMap());
+    }
+
+    @Test
+    void deleteWritesAuditLogBeforeDeletingOraclePerson() {
+        Person person = new Person();
+        person.setId("person-1");
+        when(repository.findById("person-1")).thenReturn(Optional.of(person));
+
+        service.delete("person-1");
+
+        verify(logService).auditPersonAction(eq("person-1"), eq("Person deleted"), eq("Person record deleted"), eq("SUCCESS"), anyMap());
+        verify(repository).delete(person);
     }
 
     @Test
@@ -113,6 +169,7 @@ class PersonServiceImplTest {
         assertEquals("resume.pdf", person.getCvFileName());
         assertEquals(MediaType.APPLICATION_PDF_VALUE, person.getCvMimeType());
         verify(repository).save(person);
+        verify(logService).auditPersonAction(eq("person-1"), eq("Person CV uploaded"), eq("Person CV uploaded"), eq("SUCCESS"), anyMap());
     }
 
     @Test
@@ -278,5 +335,21 @@ class PersonServiceImplTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.getCv("person-1"));
         assertEquals("Person not found with id: person-1", exception.getMessage());
+    }
+
+    @Test
+    void getLogsCombinesOraclePersonAndMongoLogs() {
+        Person person = new Person();
+        PersonResponse response = new PersonResponse("person-1", "Ana", "Anic", "ana@mail.com", null, null, null);
+        LogResponse log = new LogResponse("log-1", LogType.AUDIT, "person-1", "Title", "Message", "SUCCESS", java.util.Map.of(), java.time.Instant.now(), java.time.Instant.now());
+
+        when(repository.findById("person-1")).thenReturn(Optional.of(person));
+        when(mapper.toResponse(person)).thenReturn(response);
+        when(logService.getByPersonId("person-1")).thenReturn(List.of(log));
+
+        PersonLogsResponse result = service.getLogs("person-1");
+
+        assertEquals(response, result.person());
+        assertEquals(List.of(log), result.items());
     }
 }

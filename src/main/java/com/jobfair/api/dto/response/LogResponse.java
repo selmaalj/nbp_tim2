@@ -8,7 +8,7 @@ import com.jobfair.domain.model.log.LogType;
 public record LogResponse(
         String id,
         LogType type,
-        Integer oracleUserId,
+        String oraclePersonId,
         String title,
         String message,
         String status,

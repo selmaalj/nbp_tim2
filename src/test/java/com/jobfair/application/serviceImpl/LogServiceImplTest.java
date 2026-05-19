@@ -22,6 +22,7 @@ import com.jobfair.domain.model.log.AuditLog;
 import com.jobfair.domain.model.log.LogType;
 import com.jobfair.domain.model.log.MessageLog;
 import com.jobfair.domain.model.log.NotificationLog;
+import com.jobfair.domain.repository.PersonRepository;
 import com.jobfair.domain.repository.log.AuditLogRepository;
 import com.jobfair.domain.repository.log.MessageLogRepository;
 import com.jobfair.domain.repository.log.NotificationLogRepository;
@@ -43,29 +44,34 @@ class LogServiceImplTest {
     @Mock
     private StatusHistoryRepository statusHistoryRepository;
 
+    @Mock
+    private PersonRepository personRepository;
+
     private LogServiceImpl service;
 
     @BeforeEach
     @SuppressWarnings("unused")
     void setUp() {
-        service = new LogServiceImpl(auditLogRepository, messageLogRepository, notificationLogRepository, statusHistoryRepository);
+        service = new LogServiceImpl(auditLogRepository, messageLogRepository, notificationLogRepository, statusHistoryRepository, personRepository);
     }
 
     @Test
     void createStoresAuditLogInAuditCollection() {
-        LogRequest request = new LogRequest(LogType.AUDIT, 7, "Created", "Record created", "SUCCESS", Map.of("entity", "person"));
+        LogRequest request = new LogRequest(LogType.AUDIT, "person-7", "Created", "Record created", "SUCCESS", Map.of("entity", "person"));
+        when(personRepository.existsById("person-7")).thenReturn(true);
         when(auditLogRepository.save(any(AuditLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         LogResponse response = service.create(request);
 
         assertEquals(LogType.AUDIT, response.type());
-        assertEquals(7, response.oracleUserId());
+        assertEquals("person-7", response.oraclePersonId());
         verify(auditLogRepository).save(any(AuditLog.class));
     }
 
     @Test
     void createStoresNotificationLogInNotificationCollection() {
-        LogRequest request = new LogRequest(LogType.NOTIFICATION, 12, "Notify", "Sent", "DONE", Map.of());
+        LogRequest request = new LogRequest(LogType.NOTIFICATION, "person-12", "Notify", "Sent", "DONE", Map.of());
+        when(personRepository.existsById("person-12")).thenReturn(true);
         when(notificationLogRepository.save(any(NotificationLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         LogResponse response = service.create(request);
@@ -78,9 +84,11 @@ class LogServiceImplTest {
     void getAllCombinesAllCollections() {
         AuditLog auditLog = new AuditLog();
         auditLog.setId("1");
+        auditLog.setOraclePersonId("person-1");
         auditLog.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
         MessageLog messageLog = new MessageLog();
         messageLog.setId("2");
+        messageLog.setOraclePersonId("person-1");
         messageLog.setCreatedAt(Instant.parse("2024-01-02T00:00:00Z"));
 
         when(auditLogRepository.findAll()).thenReturn(List.of(auditLog));
@@ -100,8 +108,9 @@ class LogServiceImplTest {
         AuditLog auditLog = new AuditLog();
         auditLog.setId("1");
         when(auditLogRepository.findById("1")).thenReturn(Optional.of(auditLog));
+        when(personRepository.existsById("person-1")).thenReturn(true);
 
-        LogRequest request = new LogRequest(LogType.MESSAGE, 1, "A", "B", null, Map.of());
+        LogRequest request = new LogRequest(LogType.MESSAGE, "person-1", "A", "B", null, Map.of());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.update("1", request));
         assertEquals("Log type cannot be changed once stored", exception.getMessage());
@@ -116,5 +125,39 @@ class LogServiceImplTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.getById("missing"));
         assertEquals("Log not found with id: missing", exception.getMessage());
+    }
+
+    @Test
+    void createRejectsMissingOraclePerson() {
+        LogRequest request = new LogRequest(LogType.AUDIT, "missing-person", "Created", "Record created", "SUCCESS", Map.of());
+        when(personRepository.existsById("missing-person")).thenReturn(false);
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.create(request));
+
+        assertEquals("Person not found with id: missing-person", exception.getMessage());
+    }
+
+    @Test
+    void getByPersonIdCombinesPersonLogs() {
+        AuditLog auditLog = new AuditLog();
+        auditLog.setId("audit-1");
+        auditLog.setOraclePersonId("person-1");
+        auditLog.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+        MessageLog messageLog = new MessageLog();
+        messageLog.setId("message-1");
+        messageLog.setOraclePersonId("person-1");
+        messageLog.setCreatedAt(Instant.parse("2024-01-02T00:00:00Z"));
+
+        when(personRepository.existsById("person-1")).thenReturn(true);
+        when(auditLogRepository.findByOraclePersonIdOrderByCreatedAtDesc("person-1")).thenReturn(List.of(auditLog));
+        when(messageLogRepository.findByOraclePersonIdOrderByCreatedAtDesc("person-1")).thenReturn(List.of(messageLog));
+        when(notificationLogRepository.findByOraclePersonIdOrderByCreatedAtDesc("person-1")).thenReturn(List.of());
+        when(statusHistoryRepository.findByOraclePersonIdOrderByCreatedAtDesc("person-1")).thenReturn(List.of());
+
+        List<LogResponse> result = service.getByPersonId("person-1");
+
+        assertEquals(2, result.size());
+        assertEquals("message-1", result.get(0).id());
+        assertEquals("audit-1", result.get(1).id());
     }
 }

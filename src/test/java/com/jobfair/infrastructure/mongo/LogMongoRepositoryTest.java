@@ -41,7 +41,7 @@ class LogMongoRepositoryTest {
     @Test
     void auditLogIsPersistedAndReadBack() {
         AuditLog document = new AuditLog();
-        document.setOracleUserId(55);
+        document.setOraclePersonId("person-55");
         document.setTitle("Created");
         document.setMessage("Saved person");
         document.setStatus("SUCCESS");
@@ -51,15 +51,16 @@ class LogMongoRepositoryTest {
         AuditLog saved = auditLogRepository.save(document);
         AuditLog found = auditLogRepository.findById(saved.getId()).orElseThrow();
 
-        assertEquals(55, found.getOracleUserId());
+        assertEquals("person-55", found.getOraclePersonId());
         assertEquals("Created", found.getTitle());
         assertEquals("person", found.safeDetails().get("entity"));
+        assertEquals(1, auditLogRepository.findByOraclePersonIdOrderByCreatedAtDesc("person-55").size());
     }
 
     @Test
     void statusHistoryIsPersistedAndReadBack() {
         StatusHistory document = new StatusHistory();
-        document.setOracleUserId(88);
+        document.setOraclePersonId("person-88");
         document.setTitle("Status changed");
         document.setMessage("Moved to approved");
         document.setStatus("APPROVED");
@@ -68,7 +69,7 @@ class LogMongoRepositoryTest {
         StatusHistory saved = statusHistoryRepository.save(document);
         StatusHistory found = statusHistoryRepository.findById(saved.getId()).orElseThrow();
 
-        assertEquals(88, found.getOracleUserId());
+        assertEquals("person-88", found.getOraclePersonId());
         assertEquals("APPROVED", found.getStatus());
         assertEquals("APPROVED", found.safeDetails().get("to"));
     }
