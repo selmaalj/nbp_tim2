@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.jobfair.api.dto.request.PersonRequest;
 import com.jobfair.api.dto.response.PersonCvFileResponse;
+import com.jobfair.api.dto.response.PersonLogsResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.domain.service.PersonService;
 import com.jobfair.shared.constants.ApiPaths;
@@ -37,6 +38,7 @@ import com.jobfair.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -172,6 +174,30 @@ public class PersonController extends AbstractCrudController<String, PersonReque
         }
 
         return new ResponseEntity<>(cvFile.content(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/logs")
+    @Operation(summary = "Get Mongo log entries for an Oracle person")
+    @EndpointDocumentation(order = 130, snippetId = "people-logs", displayName = "GET /people/{id}/logs", summary = "Get person logs from MongoDB", pathParameters = @DocParameter(name = "id", value = "person-1"), errorProfiles = ErrorDocProfile.NOT_FOUND)
+    public ResponseEntity<ApiResponse<PersonLogsResponse>> logs(@PathVariable String id) {
+        PersonLogsResponse payload = personService.getLogs(id);
+        return ResponseEntity.ok(ApiResponse.success("Person logs fetched successfully", payload));
+    }
+
+    @GetMapping("/{id}/status-history")
+    @Operation(summary = "Get Mongo status history for an Oracle person")
+    @EndpointDocumentation(order = 140, snippetId = "people-status-history", displayName = "GET /people/{id}/status-history", summary = "Get person status history from MongoDB", pathParameters = @DocParameter(name = "id", value = "person-1"), errorProfiles = ErrorDocProfile.NOT_FOUND)
+    public ResponseEntity<ApiResponse<PersonLogsResponse>> statusHistory(@PathVariable String id) {
+        PersonLogsResponse payload = personService.getStatusHistory(id);
+        return ResponseEntity.ok(ApiResponse.success("Person status history fetched successfully", payload));
+    }
+
+    @GetMapping("/{id}/notifications")
+    @Operation(summary = "Get Mongo notification logs for an Oracle person")
+    @EndpointDocumentation(order = 150, snippetId = "people-notifications", displayName = "GET /people/{id}/notifications", summary = "Get person notifications from MongoDB", pathParameters = @DocParameter(name = "id", value = "person-1"), errorProfiles = ErrorDocProfile.NOT_FOUND)
+    public ResponseEntity<ApiResponse<PersonLogsResponse>> notifications(@PathVariable String id) {
+        PersonLogsResponse payload = personService.getNotifications(id);
+        return ResponseEntity.ok(ApiResponse.success("Person notifications fetched successfully", payload));
     }
 
     private String trimToNull(String value) {

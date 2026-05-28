@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jobfair.api.dto.response.PersonCvFileResponse;
+import com.jobfair.api.dto.response.PersonLogsResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.domain.service.PersonService;
 import com.jobfair.shared.response.ApiResponse;
@@ -151,5 +152,44 @@ class PersonControllerTest {
         ResponseEntity<byte[]> response = controller.getCv("person-1");
 
         assertEquals(MediaType.APPLICATION_PDF_VALUE, response.getHeaders().getFirst("X-Original-Content-Type"));
+    }
+
+    @Test
+    void logsDelegatesToServiceAndReturnsPayload() {
+        PersonLogsResponse payload = new PersonLogsResponse(new PersonResponse("person-1", "Ana", "Anic", null, null, null, null), List.of());
+        when(personService.getLogs("person-1")).thenReturn(payload);
+
+        ResponseEntity<ApiResponse<PersonLogsResponse>> response = controller.logs("person-1");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(payload, response.getBody().data());
+        verify(personService).getLogs("person-1");
+    }
+
+    @Test
+    void statusHistoryDelegatesToServiceAndReturnsPayload() {
+        PersonLogsResponse payload = new PersonLogsResponse(new PersonResponse("person-1", "Ana", "Anic", null, null, null, null), List.of());
+        when(personService.getStatusHistory("person-1")).thenReturn(payload);
+
+        ResponseEntity<ApiResponse<PersonLogsResponse>> response = controller.statusHistory("person-1");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(payload, response.getBody().data());
+        verify(personService).getStatusHistory("person-1");
+    }
+
+    @Test
+    void notificationsDelegatesToServiceAndReturnsPayload() {
+        PersonLogsResponse payload = new PersonLogsResponse(new PersonResponse("person-1", "Ana", "Anic", null, null, null, null), List.of());
+        when(personService.getNotifications("person-1")).thenReturn(payload);
+
+        ResponseEntity<ApiResponse<PersonLogsResponse>> response = controller.notifications("person-1");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(payload, response.getBody().data());
+        verify(personService).getNotifications("person-1");
     }
 }

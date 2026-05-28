@@ -9,8 +9,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.reset;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +28,7 @@ import com.jobfair.api.controller.CommitteeController;
 import com.jobfair.api.controller.CommitteeMemberController;
 import com.jobfair.api.controller.GalleryImageController;
 import com.jobfair.api.controller.JobController;
+import com.jobfair.api.controller.LogController;
 import com.jobfair.api.controller.MediaController;
 import com.jobfair.api.controller.MediaOutletController;
 import com.jobfair.api.controller.MediaParticipationController;
@@ -40,6 +43,7 @@ import com.jobfair.api.dto.request.CommitteeMemberRequest;
 import com.jobfair.api.dto.request.CommitteeRequest;
 import com.jobfair.api.dto.request.GalleryImageRequest;
 import com.jobfair.api.dto.request.JobRequest;
+import com.jobfair.api.dto.request.LogRequest;
 import com.jobfair.api.dto.request.MediaOutletRequest;
 import com.jobfair.api.dto.request.MediaParticipationRequest;
 import com.jobfair.api.dto.request.MediaRequest;
@@ -54,6 +58,7 @@ import com.jobfair.api.dto.response.CommitteeMemberResponse;
 import com.jobfair.api.dto.response.CommitteeResponse;
 import com.jobfair.api.dto.response.GalleryImageResponse;
 import com.jobfair.api.dto.response.JobResponse;
+import com.jobfair.api.dto.response.LogResponse;
 import com.jobfair.api.dto.response.MediaOutletResponse;
 import com.jobfair.api.dto.response.MediaParticipationResponse;
 import com.jobfair.api.dto.response.MediaResponse;
@@ -61,17 +66,20 @@ import com.jobfair.api.dto.response.OrganizationResponse;
 import com.jobfair.api.dto.response.PackageTierResponse;
 import com.jobfair.api.dto.response.ParticipationResponse;
 import com.jobfair.api.dto.response.PersonCvFileResponse;
+import com.jobfair.api.dto.response.PersonLogsResponse;
 import com.jobfair.api.dto.response.PersonResponse;
 import com.jobfair.api.dto.response.StatBoardResponse;
 import com.jobfair.domain.model.enums.MediaKind;
 import com.jobfair.domain.model.enums.MediaTier;
 import com.jobfair.domain.model.enums.OrganizationType;
+import com.jobfair.domain.model.log.LogType;
 import com.jobfair.domain.service.ArticleImageService;
 import com.jobfair.domain.service.ArticleService;
 import com.jobfair.domain.service.CommitteeMemberService;
 import com.jobfair.domain.service.CommitteeService;
 import com.jobfair.domain.service.GalleryImageService;
 import com.jobfair.domain.service.JobService;
+import com.jobfair.domain.service.LogService;
 import com.jobfair.domain.service.MediaOutletService;
 import com.jobfair.domain.service.MediaParticipationService;
 import com.jobfair.domain.service.MediaService;
@@ -89,6 +97,7 @@ import com.jobfair.shared.exception.GlobalExceptionHandler;
         CommitteeMemberController.class,
         GalleryImageController.class,
         JobController.class,
+        LogController.class,
         MediaController.class,
         MediaOutletController.class,
         MediaParticipationController.class,
@@ -129,6 +138,9 @@ abstract class AbstractApiDocumentationTestSupport {
     protected JobService jobService;
 
     @MockitoBean
+    protected LogService logService;
+
+    @MockitoBean
     protected MediaService mediaService;
 
     @MockitoBean
@@ -161,6 +173,7 @@ abstract class AbstractApiDocumentationTestSupport {
                 committeeMemberService,
                 galleryImageService,
                 jobService,
+                logService,
                 mediaService,
                 mediaOutletService,
                 mediaParticipationService,
@@ -186,6 +199,7 @@ abstract class AbstractApiDocumentationTestSupport {
         stubGalleryImageCustom();
         stubJobCrud();
         stubJobCustom();
+        stubLogCrud();
         stubMediaCrud();
         stubMediaCustom();
         stubMediaOutletCrud();
@@ -228,6 +242,10 @@ abstract class AbstractApiDocumentationTestSupport {
         return new JobResponse("job-1", "Java Developer", "java-developer", "Build backend services", "https://jobs.jobfair.test/apply", "hr@jobfair.test", SAMPLE_TIME, SAMPLE_TIME.plusDays(30), SAMPLE_TIME);
     }
 
+    protected LogResponse logResponse() {
+        return new LogResponse("log-1", LogType.AUDIT, "person-1", "Person updated", "Person record updated", "SUCCESS", Map.of("entity", "person"), Instant.parse("2026-04-14T19:30:00Z"), Instant.parse("2026-04-14T19:30:00Z"));
+    }
+
     protected MediaResponse mediaResponse() {
         return new MediaResponse("media-1", "https://cdn.jobfair.test/media.png", 1920, 1080, 512000, "image/png", SAMPLE_TIME);
     }
@@ -258,6 +276,10 @@ abstract class AbstractApiDocumentationTestSupport {
 
     protected PersonCvFileResponse personCvFileResponse() {
         return new PersonCvFileResponse("pdf-content".getBytes(StandardCharsets.UTF_8), "resume.pdf", MediaType.APPLICATION_PDF_VALUE);
+    }
+
+    protected PersonLogsResponse personLogsResponse() {
+        return new PersonLogsResponse(personResponse(), List.of(logResponse()));
     }
 
     protected StatBoardResponse statBoardResponse() {
@@ -355,6 +377,14 @@ abstract class AbstractApiDocumentationTestSupport {
         lenient().when(jobService.getActive()).thenReturn(List.of(jobResponse()));
         lenient().when(jobService.search(anyString())).thenReturn(List.of(jobResponse()));
         lenient().when(jobService.filter(any(), any(), any(), anyBoolean())).thenReturn(List.of(jobResponse()));
+    }
+
+    protected void stubLogCrud() {
+        lenient().when(logService.create(any(LogRequest.class))).thenReturn(logResponse());
+        lenient().when(logService.getAll()).thenReturn(List.of(logResponse()));
+        lenient().when(logService.getById(anyString())).thenReturn(logResponse());
+        lenient().when(logService.update(anyString(), any(LogRequest.class))).thenReturn(logResponse());
+        doNothing().when(logService).delete(anyString());
     }
 
     protected void stubMediaCrud() {
@@ -466,6 +496,9 @@ abstract class AbstractApiDocumentationTestSupport {
         lenient().when(personService.filter(any(), any(), any())).thenReturn(List.of(personResponse()));
         doNothing().when(personService).uploadCv(anyString(), any());
         lenient().when(personService.getCv(anyString())).thenReturn(personCvFileResponse());
+        lenient().when(personService.getLogs(anyString())).thenReturn(personLogsResponse());
+        lenient().when(personService.getStatusHistory(anyString())).thenReturn(personLogsResponse());
+        lenient().when(personService.getNotifications(anyString())).thenReturn(personLogsResponse());
     }
 
     protected void stubStatBoardCrud() {

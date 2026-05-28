@@ -17,6 +17,36 @@ Spring Boot backend template sa generickim CRUD temeljom i jasnom podjelom sloje
 - Globalni exception handling i standardizovan API response
 - OpenAPI/Swagger dokumentacija
 
+## MongoDB lokalni sloj
+
+MongoDB se koristi za audit/status/message/notification logove kroz kolekcije:
+- audit_logs
+- message_logs
+- notification_logs
+- status_histories
+
+Svaki MongoDB log je povezan sa Oracle osobom preko `oracle_person_id`, odnosno `NBPT2.people.id`.
+Prije kreiranja ili izmjene MongoDB loga aplikacija provjerava da osoba postoji u Oracle `people` tabeli.
+Person create/update/patch/delete operacije automatski kreiraju audit log, kao i `POST /people/{id}/cv`.
+`GET /people/{id}/cv` ne kreira audit log.
+
+Lokalno pokretanje:
+1. Pokreni MongoDB sa Docker Compose: `docker compose up -d mongodb`
+2. Provjeri da je `MONGODB_URI` postavljen u `.env`
+3. Aplikacija se spaja na `spring.data.mongodb.uri`
+
+Mongo CRUD endpointi:
+- `GET /logs`
+- `GET /logs/{id}`
+- `POST /logs`
+- `PUT /logs/{id}`
+- `DELETE /logs/{id}`
+
+Person log endpointi koji kombinuju Oracle person podatke i MongoDB logove:
+- `GET /people/{id}/logs`
+- `GET /people/{id}/status-history`
+- `GET /people/{id}/notifications`
+
 ## Kratko uputstvo za novi entitet
 
 Prati Example kao sablon, korak po korak:
