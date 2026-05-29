@@ -16,8 +16,8 @@
 
 -- Provide existing IDs from your DB (or keep the defaults if those exist).
 -- Note: define values WITHOUT quotes because the queries already wrap them in single quotes.
-DEFINE ARTICLE_ID = article-1
-DEFINE ORGANIZATION_ID = organization-1
+DEFINE ARTICLE_ID = 60000000-0000-0000-0000-000000000001
+DEFINE ORGANIZATION_ID = 40000000-0000-0000-0000-000000000001
 
 SET SERVEROUTPUT ON
 
