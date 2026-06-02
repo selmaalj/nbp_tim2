@@ -1,14 +1,26 @@
 -- Adds indexes for common image lookup endpoints.
---
--- Motivating queries (JPA repositories):
---   - ArticleImageRepository.findByArticle_IdOrderByDisplayOrderAsc
---   - GalleryImageRepository.findByOrganization_IdOrderByDisplayOrderAsc
---   - *searchRich(...) endpoints that filter by articleId/organizationId
---
--- These indexes speed up filtering by FK and avoid extra sorting by display_order.
+-- Idempotent version: if index already exists, ignore ORA-00955.
 
-CREATE INDEX idx_article_images_article_sort
-    ON NBPT2.article_images(article_id, display_order);
+BEGIN
+    EXECUTE IMMEDIATE '
+        CREATE INDEX idx_article_images_article_sort
+        ON NBPT2.article_images(article_id, display_order)';
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE != -955 THEN
+            RAISE;
+        END IF;
+END;
+/
 
-CREATE INDEX idx_gallery_images_org_sort
-    ON NBPT2.gallery_images(organization_id, display_order);
+BEGIN
+    EXECUTE IMMEDIATE '
+        CREATE INDEX idx_gallery_images_org_sort
+        ON NBPT2.gallery_images(organization_id, display_order)';
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE != -955 THEN
+            RAISE;
+        END IF;
+END;
+/

@@ -18,6 +18,7 @@ public final class ApiPaths {
     public static final String MEDIA_OUTLETS = "/media-outlets";
     public static final String MEDIA_PARTICIPATIONS = "/media-participations";
     public static final String LOGS = "/logs";
+    public static final String XML = "/xml";
 
     private ApiPaths() {
     }
