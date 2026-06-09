@@ -1,32 +1,9 @@
--- Performance check for indexes added in:
---   src/main/resources/db/migration/V9__add_image_lookup_indexes.sql
---
--- How to use (Oracle SQL*Plus / SQLcl / SQL Developer):
---   1) Run this script BEFORE applying V9 (baseline).
---   2) Apply V9 (Flyway migrate).
---   3) Run this script again AFTER applying V9.
---
--- Compare:
---   - EXPLAIN PLAN output (FULL TABLE SCAN + SORT vs INDEX RANGE SCAN)
---   - Average elapsed time printed by DBMS_OUTPUT
---
--- Notes:
---   - Use a DB with enough rows for a visible difference.
---   - First run is usually slower (cache warm-up). Script runs 5 times; look at avg.
+-- Performance check for indexes
 
--- Provide existing IDs from your DB (or keep the defaults if those exist).
--- Note: define values WITHOUT quotes because the queries already wrap them in single quotes.
 DEFINE ARTICLE_ID = 60000000-0000-0000-0000-000000000001
 DEFINE ORGANIZATION_ID = 40000000-0000-0000-0000-000000000001
 
 SET SERVEROUTPUT ON
-
--- Optional but recommended (lets optimizer pick the right plan):
--- BEGIN
---   DBMS_STATS.GATHER_TABLE_STATS(ownname => 'NBPT2', tabname => 'ARTICLE_IMAGES', cascade => TRUE);
---   DBMS_STATS.GATHER_TABLE_STATS(ownname => 'NBPT2', tabname => 'GALLERY_IMAGES', cascade => TRUE);
--- END;
--- /
 
 PROMPT
 PROMPT ===============================
